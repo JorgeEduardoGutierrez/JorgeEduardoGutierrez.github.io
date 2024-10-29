@@ -1,52 +1,17 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card-header h2 {
     margin: 0;
-    padding: 0;
 }
 
-header {
-    background-color: #282c34;
-    padding: 20px;
-    color: white;
-    text-align: center;
-}
-
-nav a {
-    color: #61dafb;
-    margin: 0 15px;
-    text-decoration: none;
-}
-
-nav a:hover {
-    text-decoration: underline;
-}
-
-main {
-    padding: 20px;
-}
-
-.experimento {
-    margin-bottom: 50px;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 20px;
-}
-
-.grafica, .configuracion, .video, .repositorios {
-    margin-top: 20px;
-}
-
-.configuracion pre {
-    background-color: #f4f4f4;
-    padding: 10px;
-    overflow-x: auto;
+pre {
+    white-space: pre-wrap; /* Permite el ajuste de líneas largas */
 }
 
 footer {
-    background-color: #282c34;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    position: fixed;
+    position: relative;
     width: 100%;
     bottom: 0;
 }
