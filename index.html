@@ -3,75 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Experimentos</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <!-- Enlazar Chart.js desde CDN -->
+    <title>Mis Experimentos con TensorFlow</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <header>
-        <h1>Mis Experimentos con TensorFlow</h1>
-        <nav>
-            <a href="#experimento1">Experimento 1</a>
-            <a href="#experimento2">Experimento 2</a>
-            <!-- Añade más enlaces según tus experimentos -->
-        </nav>
-    </header>
+    <!-- Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Mis Experimentos</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#experimento1">Experimento 1</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#experimento2">Experimento 2</a>
+                    </li>
+                    <!-- Añade más enlaces según tus experimentos -->
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <main>
+    <!-- Contenido Principal -->
+    <div class="container my-5">
         <!-- Sección para el Primer Experimento -->
-        <section id="experimento1" class="experimento">
-            <h2>Experimento 1: Reconocimiento de Imágenes</h2>
-            
-            <!-- Gráfica de Entrenamiento -->
-            <div class="grafica">
-                <h3>Progreso del Entrenamiento</h3>
-                <canvas id="trainChart1"></canvas>
-            </div>
-            
-            <!-- Gráfica de Pie -->
-            <div class="grafica">
-                <h3>Alcance del Objetivo</h3>
-                <canvas id="pieChart1"></canvas>
-            </div>
-            
-            <!-- Configuración del Entorno -->
-            <div class="configuracion">
-                <h3>Configuración del Entorno</h3>
-                <pre>
+        <section id="experimento1" class="mb-5">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2>Experimento 1: Reconocimiento de Imágenes</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Descripción del Experimento -->
+                    <p>Descripción breve del experimento, objetivos y resultados obtenidos.</p>
+
+                    <div class="row">
+                        <!-- Gráfica de Entrenamiento -->
+                        <div class="col-md-6 mb-4">
+                            <h5>Progreso del Entrenamiento</h5>
+                            <canvas id="trainChart1"></canvas>
+                        </div>
+                        <!-- Gráfica de Pie -->
+                        <div class="col-md-6 mb-4">
+                            <h5>Alcance del Objetivo</h5>
+                            <canvas id="pieChart1"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Configuración del Entorno -->
+                    <div class="mb-4">
+                        <h5>Configuración del Entorno</h5>
+                        <pre class="bg-light p-3 rounded">
 Python: 3.8
 TensorFlow: 2.9
 CUDA: 11.2
 Hardware: NVIDIA RTX 3080
-                </pre>
-            </div>
-            
-            <!-- Video del Experimento -->
-            <div class="video">
-                <h3>Video del Experimento</h3>
-                <video width="600" controls>
-                    <source src="videos/experiment1.mp4" type="video/mp4">
-                    Tu navegador no soporta la etiqueta de video.
-                </video>
-            </div>
-            
-            <!-- Enlaces a Repositorios -->
-            <div class="repositorios">
-                <h3>Enlaces a Repositorios</h3>
-                <ul>
-                    <li><a href="https://github.com/tuusuario/experimento1" target="_blank">Repositorio del Experimento 1</a></li>
-                    <!-- Añade más enlaces si es necesario -->
-                </ul>
+                        </pre>
+                    </div>
+
+                    <!-- Video del Experimento -->
+                    <div class="mb-4">
+                        <h5>Video del Experimento</h5>
+                        <div class="ratio ratio-16x9">
+                            <video controls>
+                                <source src="videos/experiment1.mp4" type="video/mp4">
+                                Tu navegador no soporta la etiqueta de video.
+                            </video>
+                        </div>
+                    </div>
+
+                    <!-- Enlaces a Repositorios -->
+                    <div>
+                        <h5>Enlaces a Repositorios</h5>
+                        <ul>
+                            <li><a href="https://github.com/tuusuario/experimento1" target="_blank">Repositorio del Experimento 1</a></li>
+                            <!-- Añade más enlaces si es necesario -->
+                        </ul>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- Repite secciones para más experimentos -->
-    </main>
+        <section id="experimento2" class="mb-5">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2>Experimento 2: [Título del Experimento 2]</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Contenido similar al Experimento 1 -->
+                    <p>Descripción breve del experimento, objetivos y resultados obtenidos.</p>
 
-    <footer>
-        <p>&copy; 2024 Tu Nombre. Todos los derechos reservados.</p>
+                    <div class="row">
+                        <!-- Gráfica de Entrenamiento -->
+                        <div class="col-md-6 mb-4">
+                            <h5>Progreso del Entrenamiento</h5>
+                            <canvas id="trainChart2"></canvas>
+                        </div>
+                        <!-- Gráfica de Pie -->
+                        <div class="col-md-6 mb-4">
+                            <h5>Alcance del Objetivo</h5>
+                            <canvas id="pieChart2"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Configuración del Entorno -->
+                    <div class="mb-4">
+                        <h5>Configuración del Entorno</h5>
+                        <pre class="bg-light p-3 rounded">
+Python: 3.x
+TensorFlow: x.x
+CUDA: x.x
+Hardware: [Especificaciones]
+                        </pre>
+                    </div>
+
+                    <!-- Video del Experimento -->
+                    <div class="mb-4">
+                        <h5>Video del Experimento</h5>
+                        <div class="ratio ratio-16x9">
+                            <video controls>
+                                <source src="videos/experiment2.mp4" type="video/mp4">
+                                Tu navegador no soporta la etiqueta de video.
+                            </video>
+                        </div>
+                    </div>
+
+                    <!-- Enlaces a Repositorios -->
+                    <div>
+                        <h5>Enlaces a Repositorios</h5>
+                        <ul>
+                            <li><a href="https://github.com/tuusuario/experimento2" target="_blank">Repositorio del Experimento 2</a></li>
+                            <!-- Añade más enlaces si es necesario -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Pie de Página -->
+    <footer class="bg-dark text-white text-center py-3">
+        &copy; 2024 Tu Nombre. Todos los derechos reservados.
     </footer>
 
+    <!-- Bootstrap JS y dependencias -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JS Personalizado -->
     <script src="js/scripts.js"></script>
 </body>
 </html>
