@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <div id="videoList${expId}" class="mb-3">${videoListHTML}</div>
                                     <div class="ratio ratio-16x9">
                                         <video id="mainVideo${expId}" controls>
-                                            <source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${videos[0].name}" type="video/mp4">
+                                            ${videos.length > 0 ? `<source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${videos[0].name}" type="video/mp4">` : ''}
                                             Tu navegador no soporta la etiqueta de video.
                                         </video>
                                     </div>
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // Cargar datos de gráficos
+    // Cargar datos de gráficos en dos columnas
     function loadChartData(jsonPath, containerId) {
         fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${jsonPath}`)
             .then(response => response.json())
@@ -134,9 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.innerHTML = '';
 
                 Object.keys(decodedData).forEach((key, index) => {
+                    const chartWrapper = document.createElement('div');
+                    chartWrapper.className = 'col-md-6 mb-4'; // Dos columnas
                     const chartCanvas = document.createElement('canvas');
                     chartCanvas.id = `${containerId}_${index}`;
-                    container.appendChild(chartCanvas);
+                    chartWrapper.appendChild(chartCanvas);
+                    container.appendChild(chartWrapper);
 
                     new Chart(chartCanvas.getContext('2d'), {
                         type: 'line',
@@ -158,3 +161,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchExperiments();
 });
+
