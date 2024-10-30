@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Para cada clave en el archivo JSON, crear una gráfica
                 Object.keys(data).forEach((key, index) => {
                     const metricData = data[key];
-                    const epochs = Array.from({ length: metricData.length }, (_, i) => `Época ${i + 1}`);
+                    const labels = Array.from({ length: metricData.length }, (_, i) => i + 1); // Etiquetas solo con números
 
                     // Crear elementos HTML para la gráfica
                     const chartWrapper = document.createElement('div');
@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.className = 'card';
 
                     const cardHeader = document.createElement('div');
-                    cardHeader.className = 'card-header bg-primary text-white';
-                    cardHeader.innerHTML = `<h2 class="text-white">${key.replace(/_/g, ' ')}</h2>`;
+                    cardHeader.className = 'card-header';
+                    cardHeader.innerHTML = `<h3>${key.replace(/_/g, ' ')}</h3>`; // Título más pequeño y sin color
 
                     const cardBody = document.createElement('div');
                     cardBody.className = 'card-body';
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         new Chart(ctx, {
                             type: 'line',
                             data: {
-                                labels: epochs,
+                                labels: labels, // Etiquetas sin "Época"
                                 datasets: [{
                                     label: key.replace(/_/g, ' '),
                                     data: metricData,
@@ -62,8 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 responsive: true,
                                 plugins: {
                                     title: {
-                                        display: true,
-                                        text: key.replace(/_/g, ' ')
+                                        display: false // Oculta el título interno de Chart.js
                                     }
                                 }
                             }
