@@ -7,7 +7,7 @@ const PORT = 3000;
 app.use(express.static('public')); // Servir archivos estáticos desde la carpeta 'public'
 
 // Endpoint para obtener información de los experimentos
-app.get('/api/experimentos', (req, res) => {
+app.get('api/experimentos', (req, res) => {
     const dataDir = path.join(__dirname, 'data');
 
     // Leer carpetas en el directorio 'data'
