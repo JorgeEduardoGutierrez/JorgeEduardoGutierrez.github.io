@@ -54,13 +54,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Obtener config.json para configurar la sección de entorno
         fetchGitHubFile(`data/${folderName}/config.json`)
             .then(config => {
-                const descripcionHTML = `<p class="mt-4">${config.Descripcion}</p>`;
                 const configuracionHTML = `
                     <div class="card my-4">
                         <div class="card-header bg-secondary text-white">
                             <h2>Configuración del Entorno</h2>
                         </div>
                         <div class="card-body">
+                            <!-- Descripción en una sola columna -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <p>${config.Descripcion}</p>
+                                </div>
+                            </div>
+                            <!-- Entrenamiento y Test en dos columnas -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <h5>Entrenamiento</h5>
@@ -74,9 +80,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
-                tabContent.innerHTML = descripcionHTML + configuracionHTML;
+                tabContent.innerHTML = configuracionHTML;
 
-                // Cargar gráficas e imagen
+                // Añadir la imagen env.png debajo del recuadro de configuración
+                const imagenEnvHTML = `
+                    <div class="card my-4">
+                        <div class="card-body text-center">
+                            <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/env.png" alt="Imagen de Entorno" class="img-fluid">
+                        </div>
+                    </div>
+                `;
+                tabContent.innerHTML += imagenEnvHTML;
+
+                // Cargar gráficas e imagen de avance
                 loadChartData(`data/${folderName}/tensorflow.json`, `chartsContainer${expId}`);
                 const imagenHTML = `
                     <div id="chartsContainer${expId}" class="row my-4"></div>
@@ -91,18 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 tabContent.innerHTML += imagenHTML;
 
+                // Listar y cargar videos
                 fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${folderName}`)
                     .then(response => response.json())
                     .then(files => {
-                        // Filtrar archivos que tengan solo números y terminen en .mp4
                         const videos = files.filter(file => /^\d+\.mp4$/.test(file.name));
-                        
                         const videoListHTML = videos.map((video, idx) => `
                             <a href="#" class="btn btn-outline-primary btn-sm m-1" onclick="event.preventDefault(); document.getElementById('mainVideo${expId}').src='https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${video.name}'; document.getElementById('mainVideo${expId}').play()">
                                 ${video.name}
                             </a>
                         `).join('');
-                
                         const videosHTML = `
                             <div class="card my-4">
                                 <div class="card-header bg-secondary text-white">
@@ -121,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                         tabContent.innerHTML += videosHTML;
                     });
-
 
                 experimentTabsContent.appendChild(tabContent);
             });
