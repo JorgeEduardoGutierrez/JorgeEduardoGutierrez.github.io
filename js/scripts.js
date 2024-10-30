@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Función para cargar los datos de un experimento específico
-    function loadExperimentData(experimentId, jsonFile) {
-        fetch(`data/${jsonFile}`)
+    function loadExperimentData(experimentId) {
+        const basePath = `data/experimento${experimentId}`;
+        
+        // Cargar archivo JSON de métricas
+        fetch(`${basePath}/tensorflow.json`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Error al cargar el archivo JSON: ${response.statusText}`);
@@ -9,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
-                console.log(`Cargando datos para ${jsonFile}:`, Object.keys(data));
-
                 const chartsContainer = document.getElementById(`chartsContainer${experimentId}`);
                 chartsContainer.innerHTML = '';  // Limpiar el contenedor de gráficos
 
@@ -66,29 +67,52 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                             }
                         });
-                    } else {
-                        console.error(`No se pudo obtener el contexto para el canvas con id: chart${experimentId}_${index}`);
                     }
                 });
             })
             .catch(error => console.error('Error al cargar el archivo JSON:', error));
+
+        // Cargar imagen debajo de las gráficas
+        const imageElement = document.getElementById(`image${experimentId}`);
+        imageElement.src = `${basePath}/pie_chart.png`;
+
+        // Cargar videos disponibles en la subcarpeta
+        const videoList = document.getElementById(`videoList${experimentId}`);
+        const mainVideo = document.getElementById(`mainVideo${experimentId}`);
+        videoList.innerHTML = ''; // Limpiar la lista de videos
+
+        let videoIndex = 0;
+        fetch(`${basePath}/video${videoIndex}.mp4`)
+            .then(response => {
+                while (response.ok) {
+                    const videoItem = document.createElement('a');
+                    videoItem.href = "#";
+                    videoItem.className = "btn btn-outline-primary btn-sm m-1";
+                    videoItem.textContent = `Video ${videoIndex + 1}`;
+                    videoItem.addEventListener('click', () => {
+                        mainVideo.src = `${basePath}/video${videoIndex}.mp4`;
+                        mainVideo.play();
+                    });
+                    videoList.appendChild(videoItem);
+
+                    videoIndex += 1;
+                    response = fetch(`${basePath}/video${videoIndex}.mp4`);
+                }
+            })
+            .catch(error => console.log(`No se encontraron más videos en ${basePath}. Error: ${error}`));
     }
 
-    // Cargar datos del experimento al hacer clic en cada pestaña
-    const tabs = [
-        { id: '1', file: 'history_experiment1.json' },
-        { id: '2', file: 'history_experiment2.json' },
-        // Agregar más experimentos aquí
-    ];
+    // Configuración de pestañas y carga de datos inicial
+    const tabs = [1, 2]; // Lista de experimentos
 
-    tabs.forEach(tab => {
-        document.getElementById(`exp${tab.id}-tab`).addEventListener('click', () => {
-            loadExperimentData(tab.id, tab.file);
+    tabs.forEach(id => {
+        document.getElementById(`exp${id}-tab`).addEventListener('click', () => {
+            loadExperimentData(id);
         });
     });
 
     // Cargar el primer experimento de forma predeterminada
-    loadExperimentData('1', 'history_experiment1.json');
+    loadExperimentData(1);
 });
 
 
