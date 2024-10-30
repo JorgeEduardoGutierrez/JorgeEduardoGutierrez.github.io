@@ -8,120 +8,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
-                // Imprimir las claves disponibles en el JSON para depuración
-                console.log("Claves en el archivo JSON:", Object.keys(data));
+                console.log("Claves en el archivo JSON:", Object.keys(data));  // Para ver las claves disponibles
 
-                // Verificar si las métricas esperadas están en el archivo JSON
-                const expectedKeys = ['Loss/Q1_Loss', 'Accuracy/Q1_Accuracy', 'Loss/Q2_Loss', 'Accuracy/Q2_Accuracy'];
-                const missingKeys = expectedKeys.filter(key => !(key in data));
-                if (missingKeys.length > 0) {
-                    console.error(`El archivo JSON no contiene las métricas esperadas: ${missingKeys.join(', ')}`);
-                    return;
-                }
+                // Crear un contenedor para las gráficas
+                const chartsContainer = document.getElementById('chartsContainer');
+                chartsContainer.innerHTML = '';  // Limpiar el contenedor por si hay gráficos previos
 
-                // Crear etiquetas de épocas basadas en la longitud de los datos
-                const epochs = Array.from({ length: data['Loss/Q1_Loss'].length }, (_, i) => `Época ${i + 1}`);
-                
-                // Datos para las gráficas
-                const lossData = data['Loss/Q1_Loss'];
-                const accuracyData = data['Accuracy/Q1_Accuracy'];
-                const valLossData = data['Loss/Q2_Loss'];
-                const valAccuracyData = data['Accuracy/Q2_Accuracy'];
+                // Para cada clave en el archivo JSON, crear una gráfica
+                Object.keys(data).forEach((key, index) => {
+                    const metricData = data[key];
+                    const epochs = Array.from({ length: metricData.length }, (_, i) => `Época ${i + 1}`);
 
-                // Gráfica de Pérdida
-                const lossCtx = document.getElementById('lossChart').getContext('2d');
-                new Chart(lossCtx, {
-                    type: 'line',
-                    data: {
-                        labels: epochs,
-                        datasets: [{
-                            label: 'Pérdida de Entrenamiento',
-                            data: lossData,
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Pérdida durante el Entrenamiento'
+                    // Crear elementos HTML para la gráfica
+                    const chartWrapper = document.createElement('div');
+                    chartWrapper.className = 'col-md-6 mb-4';  // Dos columnas
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    const cardHeader = document.createElement('div');
+                    cardHeader.className = 'card-header bg-primary text-white';
+                    cardHeader.innerHTML = `<h2 class="text-white">${key.replace(/_/g, ' ')}</h2>`;
+
+                    const cardBody = document.createElement('div');
+                    cardBody.className = 'card-body';
+
+                    const canvas = document.createElement('canvas');
+                    canvas.id = `chart${index}`;
+
+                    // Añadir elementos al DOM
+                    cardBody.appendChild(canvas);
+                    card.appendChild(cardHeader);
+                    card.appendChild(cardBody);
+                    chartWrapper.appendChild(card);
+                    chartsContainer.appendChild(chartWrapper);
+
+                    // Renderizar la gráfica en el canvas
+                    const ctx = canvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: epochs,
+                            datasets: [{
+                                label: key.replace(/_/g, ' '),
+                                data: metricData,
+                                borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: key.replace(/_/g, ' ')
+                                }
                             }
                         }
-                    }
-                });
-
-                // Gráfica de Precisión
-                const accuracyCtx = document.getElementById('accuracyChart').getContext('2d');
-                new Chart(accuracyCtx, {
-                    type: 'line',
-                    data: {
-                        labels: epochs,
-                        datasets: [{
-                            label: 'Precisión de Entrenamiento',
-                            data: accuracyData,
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Precisión durante el Entrenamiento'
-                            }
-                        }
-                    }
-                });
-
-                // Gráfica de Pérdida de Validación
-                const valLossCtx = document.getElementById('valLossChart').getContext('2d');
-                new Chart(valLossCtx, {
-                    type: 'line',
-                    data: {
-                        labels: epochs,
-                        datasets: [{
-                            label: 'Pérdida de Validación',
-                            data: valLossData,
-                            borderColor: 'rgba(255, 206, 86, 1)',
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Pérdida de Validación durante el Entrenamiento'
-                            }
-                        }
-                    }
-                });
-
-                // Gráfica de Precisión de Validación
-                const valAccuracyCtx = document.getElementById('valAccuracyChart').getContext('2d');
-                new Chart(valAccuracyCtx, {
-                    type: 'line',
-                    data: {
-                        labels: epochs,
-                        datasets: [{
-                            label: 'Precisión de Validación',
-                            data: valAccuracyData,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Precisión de Validación durante el Entrenamiento'
-                            }
-                        }
-                    }
+                    });
                 });
             })
             .catch(error => console.error('Error al cargar el archivo JSON:', error));
@@ -130,3 +74,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // Llamar a la función para cargar y mostrar las métricas
     loadMetrics();
 });
+
