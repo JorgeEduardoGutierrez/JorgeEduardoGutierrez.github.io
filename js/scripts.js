@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${folderName}`)
                     .then(response => response.json())
                     .then(files => {
-                        const videos = files.filter(file => file.name.startsWith('video') && file.name.endsWith('.mp4'));
+                        const videos = files.filter(file => /^\d+\.mp4$/.test(file.name));
                         const videoListHTML = videos.map((video, idx) => `
                             <a href="#" class="btn btn-outline-primary btn-sm m-1" onclick="document.getElementById('mainVideo${expId}').src='https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${video.name}'">
                                 ${video.name}
