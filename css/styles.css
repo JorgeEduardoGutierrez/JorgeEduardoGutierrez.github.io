@@ -9,13 +9,16 @@ body {
     margin: 0 auto;
 }
 
-h1 {
-    color: #333;
+/* Estilo del título principal */
+.main-title {
+    color: #007bff; /* Azul */
     text-align: center;
-    font-size: 2em;
+    font-size: 2.5em;
+    font-weight: bold;
     margin-top: 20px;
 }
 
+/* Estilo de las tarjetas */
 .card {
     margin-bottom: 20px;
     border-radius: 10px;
@@ -23,20 +26,14 @@ h1 {
     overflow: hidden;
 }
 
+/* Título de las gráficas (sin fondo y más pequeño) */
 .card-header {
-    font-size: 1.5em;
+    font-size: 1.2em;
     font-weight: bold;
-    padding: 15px;
-}
-
-.bg-primary {
-    background-color: #007bff;
-    color: white;
-}
-
-.bg-secondary {
-    background-color: #6c757d;
-    color: white;
+    padding: 10px;
+    color: #333; /* Color de texto normal */
+    background-color: transparent; /* Sin fondo */
+    border-bottom: none;
 }
 
 .card-body {
@@ -68,4 +65,5 @@ footer {
     bottom: 0;
     width: 100%;
 }
+
 
