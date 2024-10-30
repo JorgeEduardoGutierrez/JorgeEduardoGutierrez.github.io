@@ -78,5 +78,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Cargar gráficas e imagen
                 loadChartData(`data/${folderName}/tensorflow.json`, `chartsContainer${expId}`);
+                const imagenHTML = `
+                    <div id="chartsContainer${expId}" class="row my-4"></div>
+                    <div class="card my-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h2>Gráfica de Avance</h2>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/pie_chart.png" alt="Pie Chart" class="img-fluid">
+                        </div>
+                    </div>
+                `;
+                tabContent.innerHTML += imagenHTML;
 
+                // Listar y cargar videos
+                fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${folderName}`)
+                    .then(response => response.json())
+                    .then(files => {
+                        const videos = files.filter(file => file.name.startsWith('video') && file.name.endsWith('.mp4'));
+                        const videoListHTML = videos.map((video, idx) => `
+                            <a href="#" class="btn btn-outline-primary btn-sm m-1" onclick="document.getElementById('mainVideo${expId}').src='https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${video.name}'">
+                                Video ${idx + 1}
+                            </a>
+                        `).join('');
+                        const videosHTML = `
+                            <div class="card my-4">
+                                <div class="card-header bg-secondary text-white">
+                                    <h2>Videos del Experimento</h2>
+                                </div>
+                                <div class="card-body">
+                                    <div id="videoList${expId}" class="mb-3">${videoListHTML}</div>
+                                    <div class="ratio ratio-16x9">
+                                        <video id="mainVideo${expId}" controls>
+                                            <source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${videos[0].name}" type="video/mp4">
+                                            Tu navegador no soporta la etiqueta de video.
+                                        </video>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        tabContent.innerHTML += videosHTML;
+                    });
 
+                experimentTabsContent.appendChild(tabContent);
+            });
+    }
+
+    // Cargar datos de gráficos
+    function loadChartData(jsonPath, containerId) {
+        fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${jsonPath}`)
+            .then(response => response.json())
+            .then(data => {
+                const decodedData = JSON.parse(atob(data.content));
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+
+                Object.keys(decodedData).forEach((key, index) => {
+                    const chartCanvas = document.createElement('canvas');
+                    chartCanvas.id = `${containerId}_${index}`;
+                    container.appendChild(chartCanvas);
+
+                    new Chart(chartCanvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
+                            datasets: [{
+                                label: key.replace(/_/g, ' '),
+                                data: decodedData[key],
+                                borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                                fill: false
+                            }]
+                        },
+                        options: { responsive: true }
+                    });
+                });
+            })
+            .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+    }
+
+    fetchExperiments();
+});
