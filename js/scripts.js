@@ -1,119 +1,120 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Gráficas para el Experimento 1
-    const trainCtx1 = document.getElementById('trainChart1').getContext('2d');
-    const trainChart1 = new Chart(trainCtx1, {
-        type: 'line',
-        data: {
-            labels: ['Época 1', 'Época 2', 'Época 3', 'Época 4', 'Época 5'],
-            datasets: [{
-                label: 'Precisión',
-                data: [0.6, 0.7, 0.75, 0.8, 0.85],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                fill: false
-            },
-            {
-                label: 'Pérdida',
-                data: [0.8, 0.6, 0.5, 0.4, 0.3],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Progreso del Entrenamiento'
+    // Función para renderizar una gráfica de línea
+    function renderLineChart(jsonPath, canvasId, datasetLabels, datasetColors, title) {
+        fetch(jsonPath)
+            .then(response => response.json())
+            .then(data => {
+                // Verificar que las métricas existen en el JSON
+                if (!data.loss || !data.accuracy || !data.val_loss || !data.val_accuracy) {
+                    console.error(`El archivo ${jsonPath} no contiene las métricas esperadas.`);
+                    return;
                 }
-            }
-        }
-    });
 
-    const pieCtx1 = document.getElementById('pieChart1').getContext('2d');
-    const pieChart1 = new Chart(pieCtx1, {
-        type: 'pie',
-        data: {
-            labels: ['Objetivo Alcanzado', 'Restante'],
-            datasets: [{
-                data: [85, 15],
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(255, 206, 86, 0.7)'
-                ],
-                borderColor: [
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Alcance del Objetivo'
-                }
-            }
-        }
-    });
+                // Generar etiquetas de épocas basadas en la longitud de 'loss'
+                const epochs = data.loss.map((_, index) => `Época ${index + 1}`);
 
-    // Gráficas para el Experimento 2
-    const trainCtx2 = document.getElementById('trainChart2').getContext('2d');
-    const trainChart2 = new Chart(trainCtx2, {
-        type: 'line',
-        data: {
-            labels: ['Época 1', 'Época 2', 'Época 3', 'Época 4', 'Época 5'],
-            datasets: [{
-                label: 'Precisión',
-                data: [0.5, 0.65, 0.7, 0.78, 0.82],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                fill: false
-            },
-            {
-                label: 'Pérdida',
-                data: [0.9, 0.7, 0.6, 0.5, 0.35],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Progreso del Entrenamiento'
-                }
-            }
-        }
-    });
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: epochs,
+                        datasets: datasetLabels.map((label, index) => ({
+                            label: label,
+                            data: data[label.toLowerCase().replace(' ', '_')],
+                            borderColor: datasetColors[index],
+                            fill: false
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: title
+                            },
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            }
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Épocas'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Valor'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error(`Error al cargar ${jsonPath}:`, error));
+    }
 
-    const pieCtx2 = document.getElementById('pieChart2').getContext('2d');
-    const pieChart2 = new Chart(pieCtx2, {
-        type: 'pie',
-        data: {
-            labels: ['Objetivo Alcanzado', 'Restante'],
-            datasets: [{
-                data: [82, 18],
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(255, 206, 86, 0.7)'
-                ],
-                borderColor: [
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)'
-                ],
-                borderWidth: 1
-            }]
+    // Lista de experimentos con sus respectivas configuraciones
+    const experiments = [
+        {
+            name: 'Experimento 1: Reconocimiento de Imágenes',
+            json: 'data/history_experiment1.json',
+            lossChart: 'lossChart1',
+            accuracyChart: 'accuracyChart1',
+            lossTitle: 'Pérdida por Época - Experimento 1',
+            accuracyTitle: 'Precisión por Época - Experimento 1',
+            lossDatasetLabels: ['Pérdida de Entrenamiento', 'Pérdida de Validación'],
+            lossDatasetColors: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+            accuracyDatasetLabels: ['Precisión de Entrenamiento', 'Precisión de Validación'],
+            accuracyDatasetColors: ['rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)']
         },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Alcance del Objetivo'
-                }
-            }
+        {
+            name: 'Experimento 2: Clasificación de Texto',
+            json: 'data/history_experiment2.json',
+            lossChart: 'lossChart2',
+            accuracyChart: 'accuracyChart2',
+            lossTitle: 'Pérdida por Época - Experimento 2',
+            accuracyTitle: 'Precisión por Época - Experimento 2',
+            lossDatasetLabels: ['Pérdida de Entrenamiento', 'Pérdida de Validación'],
+            lossDatasetColors: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+            accuracyDatasetLabels: ['Precisión de Entrenamiento', 'Precisión de Validación'],
+            accuracyDatasetColors: ['rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)']
         }
+        // Añade más experimentos según sea necesario
+    ];
+
+    // Iterar sobre cada experimento y renderizar las gráficas
+    experiments.forEach(exp => {
+        // Renderizar Gráfica de Pérdida
+        renderLineChart(
+            exp.json,
+            exp.lossChart,
+            exp.lossDatasetLabels,
+            exp.lossDatasetColors,
+            exp.lossTitle
+        );
+
+        // Renderizar Gráfica de Precisión
+        renderLineChart(
+            exp.json,
+            exp.accuracyChart,
+            exp.accuracyDatasetLabels,
+            exp.accuracyDatasetColors,
+            exp.accuracyTitle
+        );
     });
 });
+
