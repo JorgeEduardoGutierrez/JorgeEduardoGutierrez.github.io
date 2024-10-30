@@ -10,6 +10,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Meta Tags para SEO -->
+    <meta name="description" content="Página web para reportar experimentos realizados con TensorFlow, incluyendo gráficas, videos y enlaces a repositorios.">
+    <meta name="keywords" content="TensorFlow, Experimentos, Gráficas, Machine Learning, GitHub">
 </head>
 <body>
     <!-- Navegación -->
@@ -47,15 +50,15 @@
                     <p>En este experimento, desarrollamos un modelo de reconocimiento de imágenes utilizando TensorFlow. Se entrenó con un conjunto de datos de imágenes etiquetadas para clasificar objetos con alta precisión.</p>
 
                     <div class="row">
-                        <!-- Gráfica de Entrenamiento -->
+                        <!-- Gráfica de Pérdida -->
                         <div class="col-md-6 mb-4">
-                            <h5>Progreso del Entrenamiento</h5>
-                            <canvas id="trainChart1"></canvas>
+                            <h5>Pérdida por Época</h5>
+                            <canvas id="lossChart1"></canvas>
                         </div>
-                        <!-- Gráfica de Pie -->
+                        <!-- Gráfica de Precisión -->
                         <div class="col-md-6 mb-4">
-                            <h5>Alcance del Objetivo</h5>
-                            <canvas id="pieChart1"></canvas>
+                            <h5>Precisión por Época</h5>
+                            <canvas id="accuracyChart1"></canvas>
                         </div>
                     </div>
 
@@ -104,15 +107,15 @@ Hardware: NVIDIA RTX 3080
                     <p>Este experimento se centró en la clasificación de texto utilizando redes neuronales recurrentes. El objetivo fue categorizar documentos en diferentes temas con alta precisión.</p>
 
                     <div class="row">
-                        <!-- Gráfica de Entrenamiento -->
+                        <!-- Gráfica de Pérdida -->
                         <div class="col-md-6 mb-4">
-                            <h5>Progreso del Entrenamiento</h5>
-                            <canvas id="trainChart2"></canvas>
+                            <h5>Pérdida por Época</h5>
+                            <canvas id="lossChart2"></canvas>
                         </div>
-                        <!-- Gráfica de Pie -->
+                        <!-- Gráfica de Precisión -->
                         <div class="col-md-6 mb-4">
-                            <h5>Alcance del Objetivo</h5>
-                            <canvas id="pieChart2"></canvas>
+                            <h5>Precisión por Época</h5>
+                            <canvas id="accuracyChart2"></canvas>
                         </div>
                     </div>
 
@@ -162,3 +165,4 @@ Hardware: NVIDIA RTX 3090
     <script src="js/scripts.js"></script>
 </body>
 </html>
+
