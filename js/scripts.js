@@ -91,16 +91,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 tabContent.innerHTML += imagenHTML;
 
-                // Listar y cargar videos
                 fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${folderName}`)
                     .then(response => response.json())
                     .then(files => {
+                        // Filtrar archivos que tengan solo números y terminen en .mp4
                         const videos = files.filter(file => /^\d+\.mp4$/.test(file.name));
+                        
                         const videoListHTML = videos.map((video, idx) => `
-                            <a href="#" class="btn btn-outline-primary btn-sm m-1" onclick="document.getElementById('mainVideo${expId}').src='https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${video.name}'">
+                            <a href="#" class="btn btn-outline-primary btn-sm m-1" onclick="event.preventDefault(); document.getElementById('mainVideo${expId}').src='https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${video.name}'; document.getElementById('mainVideo${expId}').play()">
                                 ${video.name}
                             </a>
                         `).join('');
+                
                         const videosHTML = `
                             <div class="card my-4">
                                 <div class="card-header bg-secondary text-white">
@@ -119,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                         tabContent.innerHTML += videosHTML;
                     });
+
 
                 experimentTabsContent.appendChild(tabContent);
             });
