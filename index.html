@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados del Entrenamiento</title>
+    <title>Resultados del Entrenamiento SAC</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Chart.js -->
@@ -30,40 +30,35 @@
         <div class="tab-content" id="experimentTabsContent">
             <!-- Pestaña de Experimento 1 -->
             <div class="tab-pane fade show active" id="exp1" role="tabpanel" aria-labelledby="exp1-tab">
-                <!-- Configuración del Entorno -->
+                
+                <!-- Configuración del Entorno en dos columnas -->
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
                         <h2>Configuración del Entorno</h2>
                     </div>
                     <div class="card-body">
-                        <pre>
-action_dim: 2
-alpha: 0.2
-batch_size: 256
-gamma: 0.99
-goal_at_center: true
-learning_rate: 0.0003
-min_dist: 1
-num_block_test: 1000
-num_episodes: 750
-num_goals: 1
-num_obstacles: 0
-num_test_per_block: 1
-num_video_test: 10
-replaybuffer_size: 1000000
-reward_negative: 0
-reward_neutral: 0
-reward_positive: 100
-room_length: 15
-room_width: 10
-short_term_memory_size: 5
-state_dim: 25
-steps_per_episode: 1000
-tau: 0.005
-test_videos: 100
-update_after: 5000
-
-                        </pre>
+                        <div class="row">
+                            <!-- Configuración de Entrenamiento -->
+                            <div class="col-md-6">
+                                <h5>Entrenamiento</h5>
+                                <pre>
+Python: 3.8
+TensorFlow: 2.9
+CUDA: 11.2
+Hardware: NVIDIA RTX 3080
+                                </pre>
+                            </div>
+                            <!-- Configuración de Test -->
+                            <div class="col-md-6">
+                                <h5>Test</h5>
+                                <pre>
+Python: 3.8
+TensorFlow: 2.9
+CUDA: 11.2
+Hardware: NVIDIA GTX 1080
+                                </pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -99,18 +94,34 @@ update_after: 5000
 
             <!-- Pestaña de Experimento 2 (similar estructura) -->
             <div class="tab-pane fade" id="exp2" role="tabpanel" aria-labelledby="exp2-tab">
-                <!-- Configuración del Entorno -->
+                <!-- Configuración del Entorno en dos columnas -->
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
                         <h2>Configuración del Entorno</h2>
                     </div>
                     <div class="card-body">
-                        <pre>
+                        <div class="row">
+                            <!-- Configuración de Entrenamiento -->
+                            <div class="col-md-6">
+                                <h5>Entrenamiento</h5>
+                                <pre>
 Python: 3.9
 TensorFlow: 2.10
 CUDA: 11.3
 Hardware: NVIDIA RTX 3090
-                        </pre>
+                                </pre>
+                            </div>
+                            <!-- Configuración de Test -->
+                            <div class="col-md-6">
+                                <h5>Test</h5>
+                                <pre>
+Python: 3.9
+TensorFlow: 2.10
+CUDA: 11.3
+Hardware: NVIDIA GTX 1070
+                                </pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
