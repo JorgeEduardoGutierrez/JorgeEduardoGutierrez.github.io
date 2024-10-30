@@ -31,7 +31,6 @@
         <div class="tab-content" id="experimentTabsContent">
             <!-- Pestaña de Experimento 1 -->
             <div class="tab-pane fade show active" id="exp1" role="tabpanel" aria-labelledby="exp1-tab">
-                <div id="chartsContainer1" class="row my-4"></div>
                 <!-- Configuración del Entorno -->
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
@@ -46,10 +45,28 @@ Hardware: NVIDIA RTX 3080
                         </pre>
                     </div>
                 </div>
+                
+                <!-- Video del Experimento 1 -->
+                <div class="card my-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>Video del Experimento</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="ratio ratio-16x9">
+                            <video controls>
+                                <source src="videos/experiment1.mp4" type="video/mp4">
+                                Tu navegador no soporta la etiqueta de video.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenedor para las gráficas dinámicas -->
+                <div id="chartsContainer1" class="row my-4"></div>
             </div>
+
             <!-- Pestaña de Experimento 2 -->
             <div class="tab-pane fade" id="exp2" role="tabpanel" aria-labelledby="exp2-tab">
-                <div id="chartsContainer2" class="row my-4"></div>
                 <!-- Configuración del Entorno -->
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
@@ -64,6 +81,24 @@ Hardware: NVIDIA RTX 3090
                         </pre>
                     </div>
                 </div>
+                
+                <!-- Video del Experimento 2 -->
+                <div class="card my-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>Video del Experimento</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="ratio ratio-16x9">
+                            <video controls>
+                                <source src="videos/experiment2.mp4" type="video/mp4">
+                                Tu navegador no soporta la etiqueta de video.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenedor para las gráficas dinámicas -->
+                <div id="chartsContainer2" class="row my-4"></div>
             </div>
             <!-- Añadir más contenedores de experimentos aquí -->
         </div>
@@ -80,5 +115,4 @@ Hardware: NVIDIA RTX 3090
     <script src="js/scripts.js"></script>
 </body>
 </html>
-
 
