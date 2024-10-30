@@ -49,15 +49,26 @@ Hardware: NVIDIA RTX 3080
                 <!-- Contenedor para las gráficas dinámicas -->
                 <div id="chartsContainer1" class="row my-4"></div>
 
+                <!-- Imagen debajo de las gráficas -->
+                <div class="card my-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>Gráfica de Avance</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <img id="image1" src="" alt="Pie Chart" class="img-fluid">
+                    </div>
+                </div>
+
                 <!-- Video del Experimento 1 -->
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
-                        <h2>Video del Experimento</h2>
+                        <h2>Videos del Experimento</h2>
                     </div>
                     <div class="card-body">
+                        <div id="videoList1" class="mb-3"></div>
                         <div class="ratio ratio-16x9">
-                            <video controls>
-                                <source src="videos/experiment1.mp4" type="video/mp4">
+                            <video id="mainVideo1" controls>
+                                <source src="" type="video/mp4">
                                 Tu navegador no soporta la etiqueta de video.
                             </video>
                         </div>
@@ -65,7 +76,7 @@ Hardware: NVIDIA RTX 3080
                 </div>
             </div>
 
-            <!-- Pestaña de Experimento 2 -->
+            <!-- Pestaña de Experimento 2 (similar estructura) -->
             <div class="tab-pane fade" id="exp2" role="tabpanel" aria-labelledby="exp2-tab">
                 <!-- Configuración del Entorno -->
                 <div class="card my-4">
@@ -85,15 +96,26 @@ Hardware: NVIDIA RTX 3090
                 <!-- Contenedor para las gráficas dinámicas -->
                 <div id="chartsContainer2" class="row my-4"></div>
 
+                <!-- Imagen debajo de las gráficas -->
+                <div class="card my-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>Gráfica de Avance</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <img id="image2" src="" alt="Pie Chart" class="img-fluid">
+                    </div>
+                </div>
+
                 <!-- Video del Experimento 2 -->
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
-                        <h2>Video del Experimento</h2>
+                        <h2>Videos del Experimento</h2>
                     </div>
                     <div class="card-body">
+                        <div id="videoList2" class="mb-3"></div>
                         <div class="ratio ratio-16x9">
-                            <video controls>
-                                <source src="videos/experiment2.mp4" type="video/mp4">
+                            <video id="mainVideo2" controls>
+                                <source src="" type="video/mp4">
                                 Tu navegador no soporta la etiqueta de video.
                             </video>
                         </div>
@@ -115,5 +137,4 @@ Hardware: NVIDIA RTX 3090
     <script src="js/scripts.js"></script>
 </body>
 </html>
-
 
