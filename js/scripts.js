@@ -43,29 +43,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     chartWrapper.appendChild(card);
                     chartsContainer.appendChild(chartWrapper);
 
-                    // Renderizar la gráfica en el canvas
+                    // Asegurarnos de que el canvas se agregó correctamente antes de acceder a él
                     const ctx = canvas.getContext('2d');
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: epochs,
-                            datasets: [{
-                                label: key.replace(/_/g, ' '),
-                                data: metricData,
-                                borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
-                                fill: false
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: key.replace(/_/g, ' ')
+                    if (ctx) {
+                        // Renderizar la gráfica en el canvas
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: epochs,
+                                datasets: [{
+                                    label: key.replace(/_/g, ' '),
+                                    data: metricData,
+                                    borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                                    fill: false
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: key.replace(/_/g, ' ')
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                    } else {
+                        console.error(`No se pudo obtener el contexto para el canvas con id: chart${index}`);
+                    }
                 });
             })
             .catch(error => console.error('Error al cargar el archivo JSON:', error));
@@ -74,4 +79,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Llamar a la función para cargar y mostrar las métricas
     loadMetrics();
 });
+
 
