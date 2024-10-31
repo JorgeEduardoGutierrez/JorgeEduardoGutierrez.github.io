@@ -14,16 +14,11 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <!-- Barra Lateral con nuevo estilo -->
+            <!-- Barra Lateral Dinámica -->
             <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar-styled collapse">
                 <div class="position-sticky">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#" onclick="loadExperimentSet('sac')">Experimentos SAC</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="loadExperimentSet('reinforce')">Experimentos Reinforce</a>
-                        </li>
+                    <ul class="nav flex-column" id="sidebarMenu">
+                        <!-- Aquí se agregarán dinámicamente los enlaces a los experimentos -->
                     </ul>
                 </div>
             </nav>
