@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div id="chartsContainer${expId}" class="row my-4"></div>
                     <div class="card my-4">
                         <div class="card-header bg-secondary text-white">
-                            <h2>Gráfica de Avance</h2>
+                            <h2>Resultados del test sobre 100 experimentos</h2>
                         </div>
                         <div class="card-body text-center">
                             <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/pie_chart.png" alt="Pie Chart" class="img-fluid">
