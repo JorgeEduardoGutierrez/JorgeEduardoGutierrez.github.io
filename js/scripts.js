@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${video.name}
                             </a>
                         `).join('');
+                        
                         const videosHTML = `
                             <div class="card my-4">
                                 <div class="card-header bg-secondary text-white">
@@ -155,15 +156,17 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <div id="videoList${expId}" class="mb-3">${videoListHTML}</div>
                                     <div class="ratio ratio-16x9">
                                         <video id="mainVideo${expId}" controls>
-                                            ${videos.length > 0 ? `<source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}" type="video/mp4">` : ''}
+                                            ${videos.length > 0 ? `<source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${videos[0].name}" type="video/mp4">` : ''}
                                             Tu navegador no soporta la etiqueta de video.
                                         </video>
                                     </div>
                                 </div>
                             </div>
                         `;
+                        
                         tabContent.innerHTML += videosHTML;
-                    });
+                    })
+                    .catch(error => console.error('Error al cargar los videos:', error));
 
                 experimentTabsContent.appendChild(tabContent);
             });
