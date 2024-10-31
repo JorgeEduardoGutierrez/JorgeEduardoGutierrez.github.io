@@ -12,14 +12,14 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <div class="container-fluid my-5">
+    <div class="container-fluid">
         <div class="row">
-            <!-- Barra Lateral -->
-            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <!-- Barra Lateral con nuevo estilo -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar-styled collapse">
                 <div class="position-sticky">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="loadExperimentSet('sac')">Experimentos SAC</a>
+                            <a class="nav-link active" href="#" onclick="loadExperimentSet('sac')">Experimentos SAC</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#" onclick="loadExperimentSet('reinforce')">Experimentos Reinforce</a>
@@ -29,8 +29,8 @@
             </nav>
 
             <!-- Contenido Principal -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <h1 class="main-title">Resultados de Experimentos</h1>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <h1 class="main-title mt-4">Resultados de Experimentos</h1>
 
                 <!-- Navegación de Pestañas Dinámica -->
                 <ul class="nav nav-tabs" id="experimentTabs" role="tablist">
@@ -46,7 +46,7 @@
     </div>
 
     <!-- Pie de Página -->
-    <footer>
+    <footer class="text-center my-4">
         &copy; 2024 Tu Nombre. Todos los derechos reservados.
     </footer>
 
@@ -56,5 +56,3 @@
     <script src="js/scripts.js"></script>
 </body>
 </html>
-
-
