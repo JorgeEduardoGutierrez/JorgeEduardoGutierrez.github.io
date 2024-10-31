@@ -1,0 +1,21 @@
+{
+    "Descripcion": {
+        "Observacion": "Vector de 5x5, los ultimos 5 estados, compuestos por 3 posiciones del robot {x, y, theta}, y coordenadas de la meta {x, y}",
+        "Metas": "Una unica meta, posicion aleatorea",
+        "Obstaculos": "Sin obstaculos",
+        "Posicion inicial": "El robot inicia en una pose aleatorea",
+        "Acciones": "Vector de dimension 2, controlando la velocidad de las ruedas desde -1 a 1"
+    },
+    "Entrenamiento": {
+        "Rewards": "0 al no lograr nada relevante, 0 al chocar, 100 al alcanzar la meta",
+        "Episodios": "1500 episodios de entrenamiento",
+        "Tiempo de entrenamiento": "11 minutos",
+        "Steps por episodio": "500",
+        "Replay memory": "1,000,000",
+        "Mini batch": "256"
+    },
+    "Test": {
+        "Entornos": "1000, la meta se conserva en el centro, el robot cambia de pose en cada experimento",
+        "Steps por episodio": "500 steps anter de terminar"
+    }
+}
