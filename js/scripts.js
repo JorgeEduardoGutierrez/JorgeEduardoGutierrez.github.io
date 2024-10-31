@@ -54,6 +54,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // Obtener config.json para configurar la sección de entorno
         fetchGitHubFile(`data/${folderName}/config.json`)
             .then(config => {
+                const descripcionHTML = `
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5>Descripción</h5>
+                            <pre>${Object.entries(config.Descripcion).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                        </div>
+                    </div>
+                `;
+                
                 const configuracionHTML = `
                     <div class="card my-4">
                         <div class="card-header bg-secondary text-white">
@@ -61,11 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="card-body">
                             <!-- Descripción en una sola columna -->
-                            <div class="row mb-3">
-                                <div class="col-12">
-                                    <p>${config.Descripcion}</p>
-                                </div>
-                            </div>
+                            ${descripcionHTML}
                             <!-- Entrenamiento y Test en dos columnas -->
                             <div class="row">
                                 <div class="col-md-6">
