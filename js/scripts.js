@@ -14,15 +14,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         link.href = "#";
                         link.className = "nav-link";
                         link.textContent = folder.name;
+
+                        // Añadir evento para resaltar el enlace seleccionado
                         link.onclick = (e) => {
                             e.preventDefault();
-                            setActiveLink(link);
+                            setActiveLink(link);  // Resalta el enlace seleccionado
                             loadExperimentSet(folder.name);
                         };
+
                         sidebarMenu.appendChild(link);
                     });
 
                 if (folders.length > 0) {
+                    // Resaltar el primer enlace automáticamente al cargar la página
+                    const firstLink = document.querySelector('#sidebarMenu .nav-link');
+                    setActiveLink(firstLink);
                     loadExperimentSet(folders[0].name);
                 }
             })
