@@ -2,34 +2,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
 
-    // Función para obtener el contenido de un archivo en GitHub
-    function fetchGitHubFile(path) {
-        return fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.encoding === 'base64') {
-                    return JSON.parse(atob(data.content));
-                }
-                throw new Error('Error al decodificar el archivo');
-            });
-    }
+    function loadExperimentSet(experimentType) {
+        // Limpiar pestañas y contenido actual
+        document.getElementById('experimentTabs').innerHTML = '';
+        document.getElementById('experimentTabsContent').innerHTML = '';
 
-    // Función para listar las carpetas de experimentos
-    function fetchExperiments() {
-        fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data`)
+        // Cargar experimentos del tipo seleccionado (sac o reinforce)
+        fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${experimentType}`)
             .then(response => response.json())
             .then(data => {
                 const experimentFolders = data.filter(item => item.type === 'dir');
                 experimentFolders.forEach((folder, index) => {
                     const expId = index + 1;
                     createExperimentTab(folder.name, expId);
-                    createExperimentContent(folder.name, expId);
+                    createExperimentContent(folder.name, experimentType, expId);
                 });
             })
             .catch(error => console.error('Error al cargar los experimentos:', error));
     }
 
-    // Crear pestañas dinámicas para cada experimento
     function createExperimentTab(folderName, expId) {
         const experimentTabs = document.getElementById('experimentTabs');
         const tab = document.createElement('li');
@@ -42,8 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         experimentTabs.appendChild(tab);
     }
 
-    // Crear contenido de cada pestaña de experimento
-    function createExperimentContent(folderName, expId) {
+    function createExperimentContent(folderName, experimentType, expId) {
         const experimentTabsContent = document.getElementById('experimentTabsContent');
         const tabContent = document.createElement('div');
         tabContent.className = `tab-pane fade ${expId === 1 ? 'show active' : ''}`;
@@ -51,8 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabContent.setAttribute('role', 'tabpanel');
         tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
 
-        // Obtener config.json para configurar la sección de entorno
-        fetchGitHubFile(`data/${folderName}/config.json`)
+        fetchGitHubFile(`data/${experimentType}/${folderName}/config.json`)
             .then(config => {
                 const descripcionHTML = `
                     <div class="row mb-3">
@@ -69,9 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2>Configuración del Entorno</h2>
                         </div>
                         <div class="card-body">
-                            <!-- Descripción en una sola columna -->
                             ${descripcionHTML}
-                            <!-- Entrenamiento y Test en dos columnas -->
                             <div class="row">
                                 <div class="col-md-6">
                                     <h5>Entrenamiento</h5>
@@ -87,38 +74,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 tabContent.innerHTML = configuracionHTML;
 
-                // Añadir la imagen env.png debajo del recuadro de configuración
                 const imagenEnvHTML = `
                     <div class="card my-4">
                         <div class="card-body text-center">
-                            <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/env.png" alt="Imagen de Entorno" class="img-fluid">
+                            <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/env.png" alt="Imagen de Entorno" class="img-fluid">
                         </div>
                     </div>
                 `;
                 tabContent.innerHTML += imagenEnvHTML;
 
-                // Cargar gráficas e imagen de avance
-                loadChartData(`data/${folderName}/tensorflow.json`, `chartsContainer${expId}`);
+                loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, `chartsContainer${expId}`);
                 const imagenHTML = `
                     <div id="chartsContainer${expId}" class="row my-4"></div>
                     <div class="card my-4">
                         <div class="card-header bg-secondary text-white">
-                            <h2>Resultados del test sobre 100 experimentos</h2>
+                            <h2>Gráfica de Avance</h2>
                         </div>
                         <div class="card-body text-center">
-                            <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/pie_chart.png" alt="Pie Chart" class="img-fluid">
+                            <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/pie_chart.png" alt="Pie Chart" class="img-fluid">
                         </div>
                     </div>
                 `;
                 tabContent.innerHTML += imagenHTML;
 
-                // Listar y cargar videos
-                fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${folderName}`)
+                fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${experimentType}/${folderName}`)
                     .then(response => response.json())
                     .then(files => {
                         const videos = files.filter(file => /^\d+\.mp4$/.test(file.name));
                         const videoListHTML = videos.map((video, idx) => `
-                            <a href="#" class="btn btn-outline-primary btn-sm m-1" onclick="event.preventDefault(); document.getElementById('mainVideo${expId}').src='https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${video.name}'; document.getElementById('mainVideo${expId}').play()">
+                            <a href="#" class="btn btn-outline-primary btn-sm m-1" onclick="event.preventDefault(); document.getElementById('mainVideo${expId}').src='https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}'; document.getElementById('mainVideo${expId}').play()">
                                 ${video.name}
                             </a>
                         `).join('');
@@ -131,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <div id="videoList${expId}" class="mb-3">${videoListHTML}</div>
                                     <div class="ratio ratio-16x9">
                                         <video id="mainVideo${expId}" controls>
-                                            ${videos.length > 0 ? `<source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${folderName}/${videos[0].name}" type="video/mp4">` : ''}
+                                            ${videos.length > 0 ? `<source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${videos[0].name}" type="video/mp4">` : ''}
                                             Tu navegador no soporta la etiqueta de video.
                                         </video>
                                     </div>
@@ -180,5 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Error al cargar los datos del gráfico:', error));
     }
 
-    fetchExperiments();
+    // Inicializar con la carga del primer conjunto de experimentos
+    loadExperimentSet('sac');
 });
