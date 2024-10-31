@@ -4,18 +4,18 @@ body {
     color: #333;
 }
 
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
+/* Añadir un pequeño margen lateral para que no esté pegado a los bordes */
+.container-fluid {
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 
-/* Estilo del título principal */
+/* Opcional: ajustar el tamaño de fuente para pantallas grandes */
 .main-title {
     color: #007bff; /* Azul */
+    font-size: 2.5rem;
     text-align: center;
-    font-size: 2.5em;
-    font-weight: bold;
-    margin-top: 20px;
+    margin-bottom: 2rem;
 }
 
 /* Estilo de las tarjetas */
