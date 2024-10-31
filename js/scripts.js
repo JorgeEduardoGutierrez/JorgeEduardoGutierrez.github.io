@@ -2,12 +2,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
 
+    // Función para listar las carpetas principales en "data" y agregarlas a la barra lateral
+    function loadMainFolders() {
+        fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data`)
+            .then(response => response.json())
+            .then(folders => {
+                folders
+                    .filter(folder => folder.type === 'dir') // Filtrar solo carpetas
+                    .forEach(folder => {
+                        // Crear un enlace en la barra lateral para cada carpeta principal
+                        const sidebar = document.getElementById('sidebar');
+                        const link = document.createElement('a');
+                        link.href = "#";
+                        link.className = "nav-link";
+                        link.textContent = folder.name;
+                        link.onclick = (e) => {
+                            e.preventDefault();
+                            loadExperimentSet(folder.name);
+                        };
+                        sidebar.appendChild(link);
+                    });
+
+                // Cargar el primer conjunto de experimentos al cargar la página
+                if (folders.length > 0) {
+                    loadExperimentSet(folders[0].name);
+                }
+            })
+            .catch(error => console.error('Error al cargar carpetas principales:', error));
+    }
+
+    // Función para cargar los experimentos dentro de una carpeta principal
     function loadExperimentSet(experimentType) {
         // Limpiar pestañas y contenido actual
         document.getElementById('experimentTabs').innerHTML = '';
         document.getElementById('experimentTabsContent').innerHTML = '';
 
-        // Cargar experimentos del tipo seleccionado (sac o reinforce)
+        // Cargar experimentos del tipo seleccionado
         fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${experimentType}`)
             .then(response => response.json())
             .then(data => {
@@ -140,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 Object.keys(decodedData).forEach((key, index) => {
                     const chartWrapper = document.createElement('div');
-                    chartWrapper.className = 'col-md-6 mb-4'; // Dos columnas
+                    chartWrapper.className = 'col-md-6 mb-4';
                     const chartCanvas = document.createElement('canvas');
                     chartCanvas.id = `${containerId}_${index}`;
                     chartWrapper.appendChild(chartCanvas);
@@ -164,6 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Error al cargar los datos del gráfico:', error));
     }
 
-    // Inicializar con la carga del primer conjunto de experimentos
-    loadExperimentSet('sac');
+    // Iniciar la carga dinámica de carpetas principales en la barra lateral
+    loadMainFolders();
 });
