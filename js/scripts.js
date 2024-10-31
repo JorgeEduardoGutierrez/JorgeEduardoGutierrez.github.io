@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabContent.setAttribute('role', 'tabpanel');
         tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
 
+        // Cargar el archivo config.json de la carpeta específica
         fetchGitHubFile(`data/${experimentType}/${folderName}/config.json`)
             .then(config => {
                 const descripcionHTML = `
@@ -154,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <div id="videoList${expId}" class="mb-3">${videoListHTML}</div>
                                     <div class="ratio ratio-16x9">
                                         <video id="mainVideo${expId}" controls>
-                                            ${videos.length > 0 ? `<source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${videos[0].name}" type="video/mp4">` : ''}
+                                            ${videos.length > 0 ? `<source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}" type="video/mp4">` : ''}
                                             Tu navegador no soporta la etiqueta de video.
                                         </video>
                                     </div>
@@ -165,6 +166,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                 experimentTabsContent.appendChild(tabContent);
+            });
+    }
+
+    function fetchGitHubFile(path) {
+        return fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.encoding === 'base64') {
+                    return JSON.parse(atob(data.content));
+                }
+                throw new Error('Error al decodificar el archivo');
             });
     }
 
