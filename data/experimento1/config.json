@@ -1,5 +1,7 @@
 {
-    "Descripcion": "Este experimento utiliza una arquitectura con SAC para optimizar el aprendizaje del agente en distintas fases.",
+    "Descripcion": {
+        "Hola: ""Este experimento utiliza una arquitectura con SAC para optimizar el aprendizaje del agente en distintas fases."
+    },
     "Entrenamiento": {
         "Python": "3.8",
         "TensorFlow": "2.9",
