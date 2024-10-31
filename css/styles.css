@@ -78,7 +78,8 @@ footer {
 .sidebar-title {
     color: #bbb;
     font-weight: bold;
-    margin-top: 1.5rem; /* Ajusta este valor para más espacio */
+    margin-top: 1.5rem; /* Ajusta el espacio superior si es necesario */
+    text-align: center; /* Centrar el título */
 }
 
 .sidebar-divider {
