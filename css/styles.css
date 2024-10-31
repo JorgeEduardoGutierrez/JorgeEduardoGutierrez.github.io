@@ -72,11 +72,13 @@ footer {
     background-color: #343a40;
     color: #fff;
     min-height: 100vh;
+    padding-top: 2rem; /* Añade un relleno superior a toda la barra lateral */
 }
 
 .sidebar-title {
     color: #bbb;
     font-weight: bold;
+    margin-top: 1.5rem; /* Ajusta este valor para más espacio */
 }
 
 .sidebar-divider {
