@@ -6,8 +6,8 @@ body {
 
 /* Añadir un pequeño margen lateral para que no esté pegado a los bordes */
 .container-fluid {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: 8rem;
+    padding-right: 8rem;
 }
 
 /* Opcional: ajustar el tamaño de fuente para pantallas grandes */
