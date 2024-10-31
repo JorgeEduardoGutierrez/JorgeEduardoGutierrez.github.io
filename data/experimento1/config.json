@@ -8,9 +8,11 @@
     },
     "Entrenamiento": {
         "Rewards": "0 al no lograr nada relevante, 0 al chocar, 100 al alcanzar la meta",
+        "Episodios": "1500 episodios de entrenamiento",
+        "Tiempo de entrenamiento": "11 minutos",
+        "Steps por episodio": "500",
         "Replay memory": "1,000,000",
         "Mini batch": "256",
-        "Steps por episodio": "500",
     },
     "Test": {
         "Entornos": "1000, la meta se conserva en el centro, el robot cambia de pose en cada experimento",
