@@ -221,42 +221,57 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadChartData(jsonPath, containerId) {
         try {
             const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${jsonPath}`);
+            let content = null;
+    
             if (data && data.content) {
-                const decodedData = JSON.parse(atob(data.content));
-                const container = document.getElementById(containerId);
-                container.innerHTML = '';
-
-                let index = 0;
-                for (const key in decodedData) {
-                    const chartWrapper = document.createElement('div');
-                    chartWrapper.className = 'col-md-6 mb-4';
-                    const chartCanvas = document.createElement('canvas');
-                    chartCanvas.id = `${containerId}_${index}`;
-                    chartWrapper.appendChild(chartCanvas);
-                    container.appendChild(chartWrapper);
-
-                    new Chart(chartCanvas.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
-                            datasets: [{
-                                label: key.replace(/_/g, ' '),
-                                data: decodedData[key],
-                                borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
-                                fill: false
-                            }]
-                        },
-                        options: { responsive: true }
-                    });
-                    index++;
+                // Si el contenido está disponible y está codificado en base64
+                content = atob(data.content);
+            } else if (data && data.download_url) {
+                // Si el archivo es demasiado grande, usamos download_url para obtener el contenido
+                const response = await fetch(data.download_url);
+                if (!response.ok) {
+                    throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
                 }
+                content = await response.text();
             } else {
-                console.error('Datos JSON no encontrados o malformados');
+                throw new Error('Datos JSON no encontrados o malformados');
+            }
+    
+            // Procesar el contenido JSON
+            const decodedData = JSON.parse(content);
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+    
+            let index = 0;
+            for (const key in decodedData) {
+                const chartWrapper = document.createElement('div');
+                chartWrapper.className = 'col-md-6 mb-4';
+                const chartCanvas = document.createElement('canvas');
+                chartCanvas.id = `${containerId}_${index}`;
+                chartWrapper.appendChild(chartCanvas);
+                container.appendChild(chartWrapper);
+    
+                new Chart(chartCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
+                        datasets: [{
+                            label: key.replace(/_/g, ' '),
+                            data: decodedData[key],
+                            borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                            fill: false
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+                index++;
             }
         } catch (error) {
             console.error('Error al cargar los datos del gráfico:', error);
         }
     }
+
+    
 
     // Función para cargar y mostrar los videos del experimento
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
