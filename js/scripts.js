@@ -216,39 +216,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Carga y muestra los datos del gráfico utilizando Chart.js
-    async function loadChartData(jsonPath, containerId) {
-        try {
-            const container = document.getElementById(containerId);
-            const decodedData = await fetchGitHubFile(jsonPath);
-            container.innerHTML = ''; // Limpiar el contenedor de gráficos
-
-            Object.keys(decodedData).forEach((key, index) => {
-                const chartWrapper = document.createElement('div');
-                chartWrapper.className = 'col-md-6 mb-4';
-                const chartCanvas = document.createElement('canvas');
-                chartCanvas.id = `${containerId}_${index}`;
-                chartWrapper.appendChild(chartCanvas);
-                container.appendChild(chartWrapper);
-
-                new Chart(chartCanvas.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
-                        datasets: [{
-                            label: key.replace(/_/g, ' '),
-                            data: decodedData[key],
-                            borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
-                            fill: false
-                        }]
-                    },
-                    options: { responsive: true }
-                });
-            });
-        } catch (error) {
-            console.error('Error al cargar los datos del gráfico:', error);
+async function loadChartData(jsonPath, containerId) {
+    try {
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
+            return;
         }
+
+        const decodedData = await fetchGitHubFile(jsonPath);
+        console.log("Datos del gráfico cargados:", decodedData); // Verifica el contenido de los datos
+
+        container.innerHTML = ''; // Limpiar el contenedor de gráficos
+
+        let index = 0;
+        for (const key in decodedData) {
+            const chartWrapper = document.createElement('div');
+            chartWrapper.className = 'col-md-6 mb-4';
+            const chartCanvas = document.createElement('canvas');
+            chartCanvas.id = `${containerId}_${index}`;
+            chartWrapper.appendChild(chartCanvas);
+            container.appendChild(chartWrapper);
+
+            console.log(`Creando gráfica para "${key}" con datos:`, decodedData[key]); // Log para cada gráfica
+
+            new Chart(chartCanvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
+                    datasets: [{
+                        label: key.replace(/_/g, ' '),
+                        data: decodedData[key],
+                        borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                        fill: false
+                    }]
+                },
+                options: { responsive: true }
+            });
+            index++;
+        }
+    } catch (error) {
+        console.error('Error al cargar los datos del gráfico:', error);
     }
+}
 
     // Carga y muestra los videos del experimento
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
