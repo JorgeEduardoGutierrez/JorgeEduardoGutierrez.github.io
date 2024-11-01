@@ -206,84 +206,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadChartData(jsonPath, containerId) {
+async function loadChartData(jsonPath, containerId) {
     try {
         const container = document.getElementById(containerId);
+        
+        // Verifica si el contenedor existe y es visible
         if (!container) {
             console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
             return;
         }
-
-        container.innerHTML = ''; // Limpiar el contenedor
         console.log("Contenedor encontrado y visible, cargando gráficos...");
 
-        // Agregar un gráfico de prueba simple
+        // Limpia el contenedor
+        container.innerHTML = '';
+
+        // Agrega un canvas de prueba directamente en el contenedor con dimensiones específicas
         const testCanvas = document.createElement('canvas');
-        testCanvas.width = container.clientWidth;
-        testCanvas.height = 400;
+        testCanvas.id = 'testCanvas';
+        testCanvas.style.width = '100%';
+        testCanvas.style.height = '400px';
         container.appendChild(testCanvas);
+        console.log("Canvas de prueba agregado al contenedor");
 
-        new Chart(testCanvas.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: [1, 2, 3, 4, 5],
-                datasets: [{
-                    label: 'Gráfico de Prueba',
-                    data: [1, 3, 2, 5, 4],
-                    borderColor: 'rgb(75, 192, 192)',
-                    fill: false
-                }]
-            },
-            options: { responsive: true }
-        });
-        console.log("Gráfico de prueba agregado al contenedor");
+        // Verifica si el canvas de prueba se ha añadido correctamente
+        if (!document.getElementById('testCanvas')) {
+            console.error("No se pudo agregar el canvas de prueba al DOM.");
+            return;
+        }
 
-        // Cargar los datos de tensorflow.json desde GitHub
-        const decodedData = await fetchGitHubFile(jsonPath);
-        console.log("Datos del gráfico cargados:", decodedData);
-
-        let index = 0;
-        for (const key in decodedData) {
-            const dataSubset = decodedData[key].slice(0, 50); // Limitar a 50 puntos para pruebas
-            const chartWrapper = document.createElement('div');
-            chartWrapper.className = 'col-md-6 mb-4';
-
-            const chartCanvas = document.createElement('canvas');
-            chartCanvas.id = `${containerId}_${index}`;
-            chartCanvas.width = container.clientWidth / 2 - 20;
-            chartCanvas.height = 400;
-            chartWrapper.appendChild(chartCanvas);
-            container.appendChild(chartWrapper);
-
-            console.log(`Creando gráfica para "${key}" con datos:`, dataSubset);
-
-            new Chart(chartCanvas.getContext('2d'), {
+        // Intenta crear un gráfico en el canvas de prueba
+        try {
+            new Chart(testCanvas.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: Array.from({ length: dataSubset.length }, (_, i) => i + 1),
+                    labels: [1, 2, 3, 4, 5],
                     datasets: [{
-                        label: key.replace(/_/g, ' '),
-                        data: dataSubset,
-                        borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                        label: 'Gráfico de Prueba',
+                        data: [1, 2, 3, 2, 1],
+                        borderColor: 'rgb(75, 192, 192)',
                         fill: false
                     }]
                 },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            suggestedMin: Math.min(...dataSubset) - 1,
-                            suggestedMax: Math.max(...dataSubset) + 1
-                        }
-                    }
-                }
+                options: { responsive: true }
             });
-
-            index++;
+            console.log("Gráfico de prueba agregado al canvas.");
+        } catch (chartError) {
+            console.error("Error al crear el gráfico de prueba:", chartError);
         }
     } catch (error) {
-        console.error('Error al cargar los datos del gráfico:', error);
+        console.error('Error en loadChartData:', error);
     }
 }
 
