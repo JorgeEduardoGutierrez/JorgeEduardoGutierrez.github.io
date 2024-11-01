@@ -73,23 +73,26 @@ pre {
 
 /* Estilos para el contenedor de gráficos */
 #containerId {
-    display: flex;                /* Asegura que el contenedor se ajuste */
-    flex-wrap: wrap;              /* Permite que los gráficos se ajusten en varias filas */
-    justify-content: space-around; /* Distribuye los gráficos uniformemente */
-    border: 2px solid #333;       /* Borde visible para confirmar que el contenedor está presente */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    border: 2px solid #333;
     padding: 20px;
-    background-color: #f9f9f9;    /* Fondo claro para destacar los gráficos */
-    min-height: 500px;            /* Altura mínima para evitar que se colapse */
+    background-color: #f9f9f9;
+    min-height: 500px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto; /* Centrar el contenedor */
 }
 
-/* Estilo específico para cada canvas de gráfico */
+/* Estilos específicos para cada canvas de gráfico */
 canvas {
-    border: 1px solid #007bff;    /* Borde azul para cada gráfico individual */
-    background-color: #ffffff;    /* Fondo blanco para el canvas */
-    width: 100% !important;       /* Forzar que el canvas ocupe el 100% de su contenedor */
-    max-width: 600px;             /* Limitar el ancho máximo para evitar estiramiento excesivo */
-    height: 400px !important;     /* Altura fija para el canvas */
+    width: 100% !important;
+    height: 400px !important;
+    border: 1px solid #007bff;
+    background-color: #ffffff;
     margin: 10px;
+    box-sizing: border-box;
 }
 
 /* Estilos adicionales para gráficos individuales */
