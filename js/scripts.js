@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             mainFolders.forEach((folder, index) => {
+                const listItem = document.createElement('li');
+                listItem.className = 'nav-item';
+
                 const link = document.createElement('a');
                 link.href = "#";
                 link.className = "nav-link";
@@ -48,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     await loadExperimentSet(folder.name);
                 });
 
-                sidebarMenu.appendChild(link);
+                listItem.appendChild(link);
+                sidebarMenu.appendChild(listItem);
             });
 
             // Seleccionar y cargar la primera carpeta por defecto
