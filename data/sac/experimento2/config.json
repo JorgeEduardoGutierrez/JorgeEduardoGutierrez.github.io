@@ -1,7 +1,7 @@
 {
     "Descripcion": {
         "Observacion": "Vector de 5x5, los ultimos 5 estados, compuestos por 3 posiciones del robot {x, y, theta}, y coordenadas de la meta {x, y}",
-        "Metas": "UNA META, CENTRO DEL MAPA",
+        "Metas": "UNA META, POSICION ALEATOREA",
         "Obstaculos": "SIN OBSTACULOS",
         "Posicion inicial": "El robot inicia en una pose aleatorea",
         "Acciones": "Vector de dimension 2, controlando la velocidad de las ruedas desde -1 a 1"
