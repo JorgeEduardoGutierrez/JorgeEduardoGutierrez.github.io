@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-async function loadChartData(jsonPath, containerId) {
+    async function loadChartData(jsonPath, containerId) {
     try {
         const container = document.getElementById(containerId);
         if (!container) {
@@ -224,15 +224,14 @@ async function loadChartData(jsonPath, containerId) {
             return;
         }
 
-        // Limpiar el contenedor y asegurarse de que está visible
+        // Limpiar el contenedor
         container.innerHTML = '';
-        container.style.border = '1px solid red'; // Añadir borde temporal para confirmar visibilidad
         console.log("Contenedor encontrado y visible, cargando gráficos...");
 
         // Agregar un gráfico de prueba para verificar si el contenedor funciona
         const testCanvas = document.createElement('canvas');
-        testCanvas.width = container.clientWidth; // Forzar ancho del contenedor
-        testCanvas.height = 400; // Forzar altura
+        testCanvas.width = container.clientWidth;
+        testCanvas.height = 400;
         container.appendChild(testCanvas);
         
         new Chart(testCanvas.getContext('2d'), {
@@ -252,26 +251,23 @@ async function loadChartData(jsonPath, containerId) {
 
         // Cargar los datos de tensorflow.json desde GitHub
         const decodedData = await fetchGitHubFile(jsonPath);
-        console.log("Datos del gráfico cargados:", decodedData); // Verifica el contenido de los datos
+        console.log("Datos del gráfico cargados:", decodedData);
 
         let index = 0;
         for (const key in decodedData) {
-            // Limitar a los primeros 50 datos para pruebas
-            const dataSubset = decodedData[key].slice(0, 50); // Limitar a 50 puntos de datos para evitar sobrecarga
+            const dataSubset = decodedData[key].slice(0, 50); // Limitar a 50 puntos
             const chartWrapper = document.createElement('div');
             chartWrapper.className = 'col-md-6 mb-4';
-
             const chartCanvas = document.createElement('canvas');
             chartCanvas.id = `${containerId}_${index}`;
             chartCanvas.width = container.clientWidth / 2 - 20; // Ajuste de ancho del canvas
-            chartCanvas.height = 400; // Ajuste de altura del canvas
+            chartCanvas.height = 400;
             chartWrapper.appendChild(chartCanvas);
             container.appendChild(chartWrapper);
 
-            console.log(`Creando gráfica para "${key}" con datos:`, dataSubset); // Log para cada gráfica
+            console.log(`Creando gráfica para "${key}" con datos:`, dataSubset);
 
-            // Crear el gráfico
-            const chart = new Chart(chartCanvas.getContext('2d'), {
+            new Chart(chartCanvas.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: Array.from({ length: dataSubset.length }, (_, i) => i + 1),
@@ -294,11 +290,8 @@ async function loadChartData(jsonPath, containerId) {
                 }
             });
 
-            chart.update(); // Forzar la actualización del gráfico (opcional)
             index++;
-
-            // Para pruebas, solo renderizar el primer gráfico y salir del bucle
-            break; // Eliminar o comentar esta línea para cargar todos los gráficos
+            break; // Eliminar o comentar para cargar todos los gráficos
         }
     } catch (error) {
         console.error('Error al cargar los datos del gráfico:', error);
