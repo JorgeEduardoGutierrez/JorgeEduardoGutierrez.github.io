@@ -76,6 +76,9 @@ canvas {
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid red; /* Solo para ver los bordes */
+    width: 100% !important;
+    height: 400px !important;
 }
 
 footer {
