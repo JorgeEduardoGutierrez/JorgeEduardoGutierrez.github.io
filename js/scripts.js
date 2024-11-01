@@ -240,7 +240,6 @@ async function loadChartData(jsonPath, containerId) {
 
             console.log(`Creando gráfica para "${key}" con datos:`, decodedData[key]); // Log para cada gráfica
 
-            // Crear la instancia del gráfico
             const chart = new Chart(chartCanvas.getContext('2d'), {
                 type: 'line',
                 data: {
@@ -252,13 +251,38 @@ async function loadChartData(jsonPath, containerId) {
                         fill: false
                     }]
                 },
-                options: { responsive: true }
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMin: Math.min(...decodedData[key]) - 1,
+                            suggestedMax: Math.max(...decodedData[key]) + 1
+                        }
+                    }
+                }
             });
 
-            // Forzar la actualización del gráfico (opcional, normalmente no necesario)
-            chart.update();
+            chart.update(); // Forzar la actualización del gráfico
             index++;
         }
+
+        // Agregar gráfico de prueba al final del contenedor para verificar que Chart.js funcione
+        const testCanvas = document.createElement('canvas');
+        container.appendChild(testCanvas); // Agrega el canvas de prueba al contenedor
+        new Chart(testCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [1, 2, 3, 4, 5],
+                datasets: [{
+                    label: 'Gráfico de Prueba',
+                    data: [1, 2, 3, 2, 1],
+                    borderColor: 'rgb(75, 192, 192)',
+                    fill: false
+                }]
+            },
+            options: { responsive: true }
+        });
     } catch (error) {
         console.error('Error al cargar los datos del gráfico:', error);
     }
