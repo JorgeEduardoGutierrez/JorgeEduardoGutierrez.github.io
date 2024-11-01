@@ -240,7 +240,8 @@ async function loadChartData(jsonPath, containerId) {
 
             console.log(`Creando gráfica para "${key}" con datos:`, decodedData[key]); // Log para cada gráfica
 
-            new Chart(chartCanvas.getContext('2d'), {
+            // Crear la instancia del gráfico
+            const chart = new Chart(chartCanvas.getContext('2d'), {
                 type: 'line',
                 data: {
                     labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
@@ -253,6 +254,9 @@ async function loadChartData(jsonPath, containerId) {
                 },
                 options: { responsive: true }
             });
+
+            // Forzar la actualización del gráfico (opcional, normalmente no necesario)
+            chart.update();
             index++;
         }
     } catch (error) {
