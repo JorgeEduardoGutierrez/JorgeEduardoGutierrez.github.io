@@ -71,14 +71,36 @@ pre {
     font-size: 1em;
 }
 
+/* Estilos para el contenedor de gráficos */
+#containerId {
+    display: flex;                /* Asegura que el contenedor se ajuste */
+    flex-wrap: wrap;              /* Permite que los gráficos se ajusten en varias filas */
+    justify-content: space-around; /* Distribuye los gráficos uniformemente */
+    border: 2px solid #333;       /* Borde visible para confirmar que el contenedor está presente */
+    padding: 20px;
+    background-color: #f9f9f9;    /* Fondo claro para destacar los gráficos */
+    min-height: 500px;            /* Altura mínima para evitar que se colapse */
+}
+
+/* Estilo específico para cada canvas de gráfico */
 canvas {
-    background-color: #ffffff;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid red; /* Solo para ver los bordes */
-    width: 100% !important;
-    height: 400px !important;
+    border: 1px solid #007bff;    /* Borde azul para cada gráfico individual */
+    background-color: #ffffff;    /* Fondo blanco para el canvas */
+    width: 100% !important;       /* Forzar que el canvas ocupe el 100% de su contenedor */
+    max-width: 600px;             /* Limitar el ancho máximo para evitar estiramiento excesivo */
+    height: 400px !important;     /* Altura fija para el canvas */
+    margin: 10px;
+}
+
+/* Estilos adicionales para gráficos individuales */
+.col-md-6 {
+    flex-basis: 45%;              /* Cada gráfico ocupa aproximadamente el 45% del ancho */
+    max-width: 600px;             /* Limitar el ancho máximo */
+    margin: 10px;
+    padding: 15px;
+    background-color: #ffffff;    /* Fondo blanco en el contenedor de gráficos */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para destacar el gráfico */
+    border-radius: 10px;
 }
 
 footer {
