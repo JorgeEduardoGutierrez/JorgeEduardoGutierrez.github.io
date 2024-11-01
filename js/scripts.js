@@ -291,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             index++;
-            break; // Eliminar o comentar para cargar todos los gráficos
         }
     } catch (error) {
         console.error('Error al cargar los datos del gráfico:', error);
