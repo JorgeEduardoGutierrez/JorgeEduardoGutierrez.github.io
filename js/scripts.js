@@ -2,6 +2,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
 
+    document.addEventListener('DOMContentLoaded', () => {
+    const testContainer = document.createElement('div');
+    testContainer.id = 'test-container';
+    document.body.appendChild(testContainer); // Agrega el contenedor de prueba al final del body
+
+    const testCanvas = document.createElement('canvas');
+    testContainer.appendChild(testCanvas); // Agrega el canvas de prueba al contenedor
+
+    new Chart(testCanvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: [1, 2, 3, 4, 5],
+            datasets: [{
+                label: 'Gráfico de Prueba',
+                data: [1, 2, 3, 2, 1],
+                borderColor: 'rgb(75, 192, 192)',
+                fill: false
+            }]
+        },
+        options: { responsive: true }
+    });
+});
+
     // Función para mostrar/ocultar el indicador de carga
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
