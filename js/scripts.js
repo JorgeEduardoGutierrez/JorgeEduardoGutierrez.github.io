@@ -224,13 +224,37 @@ async function loadChartData(jsonPath, containerId) {
             return;
         }
 
+        // Limpiar el contenedor y asegurarse de que está visible
+        container.innerHTML = '';
+        container.style.border = '1px solid red'; // Añadir borde temporal para confirmar visibilidad
+        console.log("Contenedor encontrado y visible, cargando gráficos...");
+
+        // Agregar un gráfico de prueba para verificar si el contenedor funciona
+        const testCanvas = document.createElement('canvas');
+        container.appendChild(testCanvas);
+        new Chart(testCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [1, 2, 3, 4, 5],
+                datasets: [{
+                    label: 'Gráfico de Prueba en Contenedor',
+                    data: [1, 2, 3, 2, 1],
+                    borderColor: 'rgb(75, 192, 192)',
+                    fill: false
+                }]
+            },
+            options: { responsive: true }
+        });
+        console.log("Gráfico de prueba agregado al contenedor");
+
+        // Cargar los datos de tensorflow.json desde GitHub
         const decodedData = await fetchGitHubFile(jsonPath);
         console.log("Datos del gráfico cargados:", decodedData); // Verifica el contenido de los datos
 
-        container.innerHTML = ''; // Limpiar el contenedor de gráficos
-
         let index = 0;
         for (const key in decodedData) {
+            // Limitar a los primeros 50 datos para pruebas
+            const dataSubset = decodedData[key].slice(0, 50); // Limitar a 50 puntos de datos para evitar sobrecarga
             const chartWrapper = document.createElement('div');
             chartWrapper.className = 'col-md-6 mb-4';
             const chartCanvas = document.createElement('canvas');
@@ -238,15 +262,16 @@ async function loadChartData(jsonPath, containerId) {
             chartWrapper.appendChild(chartCanvas);
             container.appendChild(chartWrapper);
 
-            console.log(`Creando gráfica para "${key}" con datos:`, decodedData[key]); // Log para cada gráfica
+            console.log(`Creando gráfica para "${key}" con datos:`, dataSubset); // Log para cada gráfica
 
+            // Crear el gráfico
             const chart = new Chart(chartCanvas.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
+                    labels: Array.from({ length: dataSubset.length }, (_, i) => i + 1),
                     datasets: [{
                         label: key.replace(/_/g, ' '),
-                        data: decodedData[key],
+                        data: dataSubset,
                         borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
                         fill: false
                     }]
@@ -256,37 +281,25 @@ async function loadChartData(jsonPath, containerId) {
                     scales: {
                         y: {
                             beginAtZero: true,
-                            suggestedMin: Math.min(...decodedData[key]) - 1,
-                            suggestedMax: Math.max(...decodedData[key]) + 1
+                            suggestedMin: Math.min(...dataSubset) - 1,
+                            suggestedMax: Math.max(...dataSubset) + 1
                         }
                     }
                 }
             });
 
-            chart.update(); // Forzar la actualización del gráfico
+            // Forzar la actualización del gráfico (opcional, normalmente no necesario)
+            chart.update();
             index++;
-        }
 
-        // Agregar gráfico de prueba al final del contenedor para verificar que Chart.js funcione
-        const testCanvas = document.createElement('canvas');
-        container.appendChild(testCanvas); // Agrega el canvas de prueba al contenedor
-        new Chart(testCanvas.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: [1, 2, 3, 4, 5],
-                datasets: [{
-                    label: 'Gráfico de Prueba',
-                    data: [1, 2, 3, 2, 1],
-                    borderColor: 'rgb(75, 192, 192)',
-                    fill: false
-                }]
-            },
-            options: { responsive: true }
-        });
+            // Para pruebas, solo renderizar el primer gráfico y salir del bucle
+            break; // Eliminar o comentar esta línea para cargar todos los gráficos
+        }
     } catch (error) {
         console.error('Error al cargar los datos del gráfico:', error);
     }
 }
+
 
     // Carga y muestra los videos del experimento
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
