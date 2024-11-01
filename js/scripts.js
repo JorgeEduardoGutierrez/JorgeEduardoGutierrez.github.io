@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
-    const githubToken = ''; // Agrega tu token de GitHub si decides usar autenticación
+    const githubToken = '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'; // Reemplaza con tu token de acceso personal
 
     // Función auxiliar para mostrar el indicador de carga
     function showLoading(show) {
@@ -9,12 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingIndicator.style.display = show ? 'block' : 'none';
     }
 
-    // Función auxiliar para realizar solicitudes a la API de GitHub con autenticación opcional
+    // Función auxiliar para realizar solicitudes a la API de GitHub con autenticación usando el token
     async function fetchFromGitHubAPI(url) {
-        const headers = {};
-        if (githubToken) {
-            headers['Authorization'] = `token ${githubToken}`;
-        }
+        const headers = {
+            'Authorization': `token ${githubToken}`
+        };
+
         const response = await fetch(url, { headers });
         if (!response.ok) {
             throw new Error(`Error de la API de GitHub: ${response.status} ${response.statusText}`);
@@ -115,183 +115,176 @@ document.addEventListener('DOMContentLoaded', () => {
         experimentTabs.appendChild(tab);
     }
 
+    // Crear y cargar el contenido para cada experimento
     async function createExperimentContent(folderName, experimentType, expId) {
-    try {
-        const experimentTabsContent = document.getElementById('experimentTabsContent');
-        const tabContent = document.createElement('div');
-        tabContent.className = `tab-pane fade ${expId === 1 ? 'show active' : ''}`;
-        tabContent.id = `exp${expId}`;
-        tabContent.setAttribute('role', 'tabpanel');
-        tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
+        try {
+            const experimentTabsContent = document.getElementById('experimentTabsContent');
+            const tabContent = document.createElement('div');
+            tabContent.className = `tab-pane fade ${expId === 1 ? 'show active' : ''}`;
+            tabContent.id = `exp${expId}`;
+            tabContent.setAttribute('role', 'tabpanel');
+            tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
 
-        // Cargar el archivo config.json
-        const config = await fetchGitHubFile(`data/${experimentType}/${folderName}/config.json`);
+            // Cargar el archivo config.json
+            const config = await fetchGitHubFile(`data/${experimentType}/${folderName}/config.json`);
 
-        // Construir el HTML para la descripción
-        const descripcionHTML = `
-            <div class="row mb-3">
-                <div class="col-12">
-                    <h5>Descripción</h5>
-                    <pre>${Object.entries(config.Descripcion).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+            // Construir el HTML para la descripción
+            const descripcionHTML = `
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <h5>Descripción</h5>
+                        <pre>${Object.entries(config.Descripcion).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
 
-        // Construir el HTML para la configuración
-        const configuracionHTML = `
-            <div class="card my-4">
-                <div class="card-header bg-secondary text-white">
-                    <h2>Configuración del Entorno</h2>
-                </div>
-                <div class="card-body">
-                    ${descripcionHTML}
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5>Entrenamiento</h5>
-                            <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                        </div>
-                        <div class="col-md-6">
-                            <h5>Test</h5>
-                            <pre>${Object.entries(config.Test).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+            // Construir el HTML para la configuración
+            const configuracionHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>Configuración del Entorno</h2>
+                    </div>
+                    <div class="card-body">
+                        ${descripcionHTML}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Entrenamiento</h5>
+                                <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Test</h5>
+                                <pre>${Object.entries(config.Test).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
-        tabContent.innerHTML = configuracionHTML;
+            `;
+            tabContent.innerHTML = configuracionHTML;
 
-        // Cargar la imagen del entorno
-        const imagenEnvHTML = `
-            <div class="card my-4">
-                <div class="card-body text-center">
-                    <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/env.png" alt="Imagen de Entorno" class="img-fluid">
+            // Cargar la imagen del entorno
+            const imagenEnvHTML = `
+                <div class="card my-4">
+                    <div class="card-body text-center">
+                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/env.png" alt="Imagen de Entorno" class="img-fluid">
+                    </div>
                 </div>
-            </div>
-        `;
-        tabContent.innerHTML += imagenEnvHTML;
+            `;
+            tabContent.innerHTML += imagenEnvHTML;
 
-        // Crear el contenedor para los gráficos antes de llamar a loadChartData
-        const chartsContainerId = `chartsContainer${expId}`;
-        const chartsContainerHTML = `<div id="${chartsContainerId}" class="row my-4"></div>`;
-        tabContent.innerHTML += chartsContainerHTML;
+            // Crear el contenedor para los gráficos antes de llamar a loadChartData
+            const chartsContainerId = `chartsContainer${expId}`;
+            const chartsContainerHTML = `<div id="${chartsContainerId}" class="row my-4"></div>`;
+            tabContent.innerHTML += chartsContainerHTML;
 
-        // Asegurarse de que el tabContent esté en el DOM antes de cargar los datos del gráfico
-        experimentTabsContent.appendChild(tabContent);
+            // Asegurarse de que el tabContent esté en el DOM antes de cargar los datos del gráfico
+            experimentTabsContent.appendChild(tabContent);
 
-        // Cargar los datos del gráfico
-        await loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
+            // Cargar los datos del gráfico
+            await loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
 
-        // Cargar la imagen de resultados
-        const imagenHTML = `
-            <div class="card my-4">
-                <div class="card-header bg-secondary text-white">
-                    <h2>Gráfica resultados del test del modelo aprendido</h2>
+            // Cargar la imagen de resultados
+            const imagenHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>Gráfica resultados del test del modelo aprendido</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/pie_chart.png" alt="Pie Chart" class="img-fluid">
+                    </div>
                 </div>
-                <div class="card-body text-center">
-                    <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/pie_chart.png" alt="Pie Chart" class="img-fluid">
-                </div>
-            </div>
-        `;
-        tabContent.innerHTML += imagenHTML;
+            `;
+            tabContent.innerHTML += imagenHTML;
 
-        // Cargar los videos del experimento
-        await loadExperimentVideos(folderName, experimentType, expId, tabContent);
+            // Cargar los videos del experimento
+            await loadExperimentVideos(folderName, experimentType, expId, tabContent);
 
-    } catch (error) {
-        console.error('Error al cargar el contenido del experimento:', error);
-        alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
+        } catch (error) {
+            console.error('Error al cargar el contenido del experimento:', error);
+            alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
+        }
     }
-}
 
-    
-        // Función para cargar un archivo JSON desde GitHub
-        async function fetchGitHubFile(path) {
-            try {
-                const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`);
-                let content = null;
-        
-                if (data && data.content) {
-                    // Si el contenido está disponible y está codificado en base64
-                    content = atob(data.content);
-                } else if (data && data.download_url) {
-                    // Si el archivo es demasiado grande, usamos download_url para obtener el contenido
-                    const response = await fetch(data.download_url);
-                    if (!response.ok) {
-                        throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
-                    }
-                    content = await response.text();
-                } else {
-                    throw new Error('Archivo no encontrado o formato incorrecto');
-                }
-        
-                return JSON.parse(content);
-            } catch (error) {
-                console.error('Error al cargar el archivo JSON:', error);
-                throw error;
+    // Función para cargar un archivo JSON desde GitHub
+    async function fetchGitHubFile(path) {
+        try {
+            const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`);
+            let content = null;
+
+            if (data && data.content) {
+                content = atob(data.content);
+            } else if (data && data.download_url) {
+                const response = await fetch(data.download_url);
+                if (!response.ok) throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
+                content = await response.text();
+            } else {
+                throw new Error('Archivo no encontrado o formato incorrecto');
             }
+
+            return JSON.parse(content);
+        } catch (error) {
+            console.error('Error al cargar el archivo JSON:', error);
+            throw error;
         }
+    }
 
-
-        async function loadChartData(jsonPath, containerId) {
-            try {
-                const container = document.getElementById(containerId);
-                if (!container) {
-                    console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
-                    return;
-                }
-        
-                const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${jsonPath}`);
-                let content = null;
-        
-                if (data && data.content) {
-                    content = atob(data.content); // Decodificar si está en base64
-                } else if (data && data.download_url) {
-                    const response = await fetch(data.download_url);
-                    if (!response.ok) throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
-                    content = await response.text(); // Descargar el contenido del archivo grande
-                } else {
-                    throw new Error('Datos JSON no encontrados o malformados');
-                }
-        
-                const decodedData = JSON.parse(content);
-                console.log("Datos del gráfico cargados:", decodedData); // Verificar el contenido de los datos
-        
-                container.innerHTML = ''; // Limpiar el contenedor de gráficos
-        
-                let index = 0;
-                for (const key in decodedData) {
-                    const chartWrapper = document.createElement('div');
-                    chartWrapper.className = 'col-md-6 mb-4';
-                    const chartCanvas = document.createElement('canvas');
-                    chartCanvas.id = `${containerId}_${index}`;
-                    chartWrapper.appendChild(chartCanvas);
-                    container.appendChild(chartWrapper);
-        
-                    // Verificar datos antes de crear el gráfico
-                    console.log(`Datos para la gráfica "${key}":`, decodedData[key]);
-        
-                    new Chart(chartCanvas.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
-                            datasets: [{
-                                label: key.replace(/_/g, ' '),
-                                data: decodedData[key],
-                                borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
-                                fill: false
-                            }]
-                        },
-                        options: { responsive: true }
-                    });
-                    index++;
-                }
-            } catch (error) {
-                console.error('Error al cargar los datos del gráfico:', error);
+    // Función para cargar y mostrar los datos del gráfico
+    async function loadChartData(jsonPath, containerId) {
+        try {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
+                return;
             }
+
+            const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${jsonPath}`);
+            let content = null;
+
+            if (data && data.content) {
+                content = atob(data.content); // Decodificar si está en base64
+            } else if (data && data.download_url) {
+                const response = await fetch(data.download_url);
+                if (!response.ok) throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
+                content = await response.text(); // Descargar el contenido del archivo grande
+            } else {
+                throw new Error('Datos JSON no encontrados o malformados');
+            }
+
+            const decodedData = JSON.parse(content);
+            console.log("Datos del gráfico cargados:", decodedData); // Verificar el contenido de los datos
+
+            container.innerHTML = ''; // Limpiar el contenedor de gráficos
+
+            let index = 0;
+            for (const key in decodedData) {
+                const chartWrapper = document.createElement('div');
+                chartWrapper.className = 'col-md-6 mb-4';
+                const chartCanvas = document.createElement('canvas');
+                chartCanvas.id = `${containerId}_${index}`;
+                chartWrapper.appendChild(chartCanvas);
+                container.appendChild(chartWrapper);
+
+                // Verificar datos antes de crear el gráfico
+                console.log(`Datos para la gráfica "${key}":`, decodedData[key]);
+
+                new Chart(chartCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
+                        datasets: [{
+                            label: key.replace(/_/g, ' '),
+                            data: decodedData[key],
+                            borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                            fill: false
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+                index++;
+            }
+        } catch (error) {
+            console.error('Error al cargar los datos del gráfico:', error);
         }
-
-    
-
+    }
 
     // Función para cargar y mostrar los videos del experimento
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
