@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createExperimentContent(folderName, experimentType, expId) {
+        console.log(`Cargando contenido para: ${folderName}, ${experimentType}, ID: ${expId}`); // Depuración
         const experimentTabsContent = document.getElementById('experimentTabsContent');
         const tabContent = document.createElement('div');
         tabContent.className = `tab-pane fade ${expId === 1 ? 'show active' : ''}`;
@@ -169,50 +170,58 @@ document.addEventListener('DOMContentLoaded', () => {
                     .catch(error => console.error('Error al cargar los videos:', error));
 
                 experimentTabsContent.appendChild(tabContent);
-            });
+            })
+            .catch(error => console.error('Error al cargar config.json:', error));
     }
 
     function fetchGitHubFile(path) {
         return fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`)
             .then(response => response.json())
             .then(data => {
-                if (data.encoding === 'base64') {
+                if (data && data.encoding === 'base64') {
                     return JSON.parse(atob(data.content));
                 }
-                throw new Error('Error al decodificar el archivo');
-            });
+                throw new Error('Error al decodificar el archivo o archivo vacío');
+            })
+            .catch(error => console.error('Error al cargar el archivo JSON:', error));
     }
 
     function loadChartData(jsonPath, containerId) {
+        console.log("Intentando cargar datos desde:", jsonPath); // Para verificar la ruta
+
         fetch(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${jsonPath}`)
             .then(response => response.json())
             .then(data => {
-                const decodedData = JSON.parse(atob(data.content));
-                const container = document.getElementById(containerId);
-                container.innerHTML = '';
+                if (data && data.content) {
+                    const decodedData = JSON.parse(atob(data.content));
+                    const container = document.getElementById(containerId);
+                    container.innerHTML = '';
 
-                Object.keys(decodedData).forEach((key, index) => {
-                    const chartWrapper = document.createElement('div');
-                    chartWrapper.className = 'col-md-6 mb-4';
-                    const chartCanvas = document.createElement('canvas');
-                    chartCanvas.id = `${containerId}_${index}`;
-                    chartWrapper.appendChild(chartCanvas);
-                    container.appendChild(chartWrapper);
+                    Object.keys(decodedData).forEach((key, index) => {
+                        const chartWrapper = document.createElement('div');
+                        chartWrapper.className = 'col-md-6 mb-4';
+                        const chartCanvas = document.createElement('canvas');
+                        chartCanvas.id = `${containerId}_${index}`;
+                        chartWrapper.appendChild(chartCanvas);
+                        container.appendChild(chartWrapper);
 
-                    new Chart(chartCanvas.getContext('2d'), {
-                        type: 'line',
-                        data: {
-                            labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
-                            datasets: [{
-                                label: key.replace(/_/g, ' '),
-                                data: decodedData[key],
-                                borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
-                                fill: false
-                            }]
-                        },
-                        options: { responsive: true }
+                        new Chart(chartCanvas.getContext('2d'), {
+                            type: 'line',
+                            data: {
+                                labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
+                                datasets: [{
+                                    label: key.replace(/_/g, ' '),
+                                    data: decodedData[key],
+                                    borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                                    fill: false
+                                }]
+                            },
+                            options: { responsive: true }
+                        });
                     });
-                });
+                } else {
+                    console.error('Datos JSON no encontrados o malformados');
+                }
             })
             .catch(error => console.error('Error al cargar los datos del gráfico:', error));
     }
