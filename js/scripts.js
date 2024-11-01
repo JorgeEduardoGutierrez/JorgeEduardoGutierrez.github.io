@@ -203,92 +203,95 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 }
 
-
-    // Función para cargar un archivo JSON desde GitHub
-    async function fetchGitHubFile(path) {
-        try {
-            const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`);
-            let content = null;
     
-            if (data && data.content) {
-                // Si el contenido está disponible y está codificado en base64
-                content = atob(data.content);
-            } else if (data && data.download_url) {
-                // Si el archivo es demasiado grande, usamos download_url para obtener el contenido
-                const response = await fetch(data.download_url);
-                if (!response.ok) {
-                    throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
+        // Función para cargar un archivo JSON desde GitHub
+        async function fetchGitHubFile(path) {
+            try {
+                const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`);
+                let content = null;
+        
+                if (data && data.content) {
+                    // Si el contenido está disponible y está codificado en base64
+                    content = atob(data.content);
+                } else if (data && data.download_url) {
+                    // Si el archivo es demasiado grande, usamos download_url para obtener el contenido
+                    const response = await fetch(data.download_url);
+                    if (!response.ok) {
+                        throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
+                    }
+                    content = await response.text();
+                } else {
+                    throw new Error('Archivo no encontrado o formato incorrecto');
                 }
-                content = await response.text();
-            } else {
-                throw new Error('Archivo no encontrado o formato incorrecto');
+        
+                return JSON.parse(content);
+            } catch (error) {
+                console.error('Error al cargar el archivo JSON:', error);
+                throw error;
             }
-    
-            return JSON.parse(content);
-        } catch (error) {
-            console.error('Error al cargar el archivo JSON:', error);
-            throw error;
         }
-    }
 
 
-    async function loadChartData(jsonPath, containerId) {
-        try {
-            const container = document.getElementById(containerId);
-            if (!container) {
-                console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
-                return; // Detener la ejecución si el contenedor no existe
-            }
-    
-            const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${jsonPath}`);
-            let content = null;
-    
-            if (data && data.content) {
-                // Si el contenido está disponible y está codificado en base64
-                content = atob(data.content);
-            } else if (data && data.download_url) {
-                // Si el archivo es demasiado grande, usamos download_url para obtener el contenido
-                const response = await fetch(data.download_url);
-                if (!response.ok) {
-                    throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
+        async function loadChartData(jsonPath, containerId) {
+            try {
+                const container = document.getElementById(containerId);
+                if (!container) {
+                    console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
+                    return;
                 }
-                content = await response.text();
-            } else {
-                throw new Error('Datos JSON no encontrados o malformados');
+        
+                const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${jsonPath}`);
+                let content = null;
+        
+                if (data && data.content) {
+                    content = atob(data.content); // Decodificar si está en base64
+                } else if (data && data.download_url) {
+                    const response = await fetch(data.download_url);
+                    if (!response.ok) throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
+                    content = await response.text(); // Descargar el contenido del archivo grande
+                } else {
+                    throw new Error('Datos JSON no encontrados o malformados');
+                }
+        
+                const decodedData = JSON.parse(content);
+                console.log("Datos del gráfico cargados:", decodedData); // Verificar el contenido de los datos
+        
+                container.innerHTML = ''; // Limpiar el contenedor de gráficos
+        
+                let index = 0;
+                for (const key in decodedData) {
+                    const chartWrapper = document.createElement('div');
+                    chartWrapper.className = 'col-md-6 mb-4';
+                    const chartCanvas = document.createElement('canvas');
+                    chartCanvas.id = `${containerId}_${index}`;
+                    chartWrapper.appendChild(chartCanvas);
+                    container.appendChild(chartWrapper);
+        
+                    // Verificar datos antes de crear el gráfico
+                    console.log(`Datos para la gráfica "${key}":`, decodedData[key]);
+        
+                    new Chart(chartCanvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
+                            datasets: [{
+                                label: key.replace(/_/g, ' '),
+                                data: decodedData[key],
+                                borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
+                                fill: false
+                            }]
+                        },
+                        options: { responsive: true }
+                    });
+                    index++;
+                }
+            } catch (error) {
+                console.error('Error al cargar los datos del gráfico:', error);
             }
-    
-            // Procesar el contenido JSON
-            const decodedData = JSON.parse(content);
-            container.innerHTML = '';
-    
-            let index = 0;
-            for (const key in decodedData) {
-                const chartWrapper = document.createElement('div');
-                chartWrapper.className = 'col-md-6 mb-4';
-                const chartCanvas = document.createElement('canvas');
-                chartCanvas.id = `${containerId}_${index}`;
-                chartWrapper.appendChild(chartCanvas);
-                container.appendChild(chartWrapper);
-    
-                new Chart(chartCanvas.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: Array.from({ length: decodedData[key].length }, (_, i) => i + 1),
-                        datasets: [{
-                            label: key.replace(/_/g, ' '),
-                            data: decodedData[key],
-                            borderColor: `hsl(${index * 50 % 360}, 70%, 50%)`,
-                            fill: false
-                        }]
-                    },
-                    options: { responsive: true }
-                });
-                index++;
-            }
-        } catch (error) {
-            console.error('Error al cargar los datos del gráfico:', error);
         }
-    }
+
+    
+
 
     // Función para cargar y mostrar los videos del experimento
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
