@@ -1,3 +1,5 @@
+/* frontend/css/styles.css */
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f2f5;
@@ -10,12 +12,28 @@ body {
     padding-right: 10rem;
 }
 
+/* Responsividad para pantallas pequeñas */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+    .main-title {
+        font-size: 2rem;
+    }
+}
+
 /* Opcional: ajustar el tamaño de fuente para pantallas grandes */
 .main-title {
     color: #007bff; /* Azul */
     font-size: 2.5rem;
     text-align: center;
     margin-bottom: 2rem;
+    transition: color 0.3s ease;
+}
+
+.main-title:hover {
+    color: #0056b3;
 }
 
 /* Estilo de las tarjetas */
@@ -34,6 +52,11 @@ body {
     color: #333; /* Color de texto normal */
     background-color: transparent; /* Sin fondo */
     border-bottom: none;
+}
+
+.card-header:hover {
+    background-color: #e9ecef;
+    cursor: default;
 }
 
 .card-body {
