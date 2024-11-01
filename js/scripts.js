@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
     
-    // Función para mostrar/ocultar el indicador de carga
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
         if (loadingIndicator) {
@@ -10,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para solicitar datos desde la API de GitHub sin autenticación
     async function fetchFromGitHubAPI(path) {
         const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
         try {
@@ -25,13 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Carga las carpetas principales desde GitHub y las agrega al menú lateral
     async function loadMainFolders() {
         try {
             showLoading(true);
             const folders = await fetchFromGitHubAPI('data');
             const sidebarMenu = document.getElementById('sidebarMenu');
-            sidebarMenu.innerHTML = ''; // Limpiar contenido existente
+            sidebarMenu.innerHTML = '';
 
             const mainFolders = folders.filter(folder => folder.type === 'dir');
             mainFolders.forEach(folder => {
@@ -53,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebarMenu.appendChild(listItem);
             });
 
-            // Seleccionar y cargar la primera carpeta por defecto
             if (mainFolders.length > 0) {
                 const firstLink = document.querySelector('#sidebarMenu .nav-link');
                 setActiveLink(firstLink);
@@ -67,14 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Resalta el enlace activo en el menú lateral
     function setActiveLink(selectedLink) {
         const links = document.querySelectorAll('#sidebarMenu .nav-link');
         links.forEach(link => link.classList.remove('active'));
         selectedLink.classList.add('active');
     }
 
-    // Carga el conjunto de experimentos para un tipo de experimento específico
     async function loadExperimentSet(experimentType) {
         try {
             showLoading(true);
@@ -92,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 createExperimentContent(folder.name, experimentType, expId);
             });
 
-            // Activar la primera pestaña por defecto
             const firstTab = document.querySelector('#experimentTabs .nav-link');
             if (firstTab) {
                 firstTab.classList.add('active');
@@ -109,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Crea una pestaña para un experimento
     function createExperimentTab(folderName, expId) {
         const experimentTabs = document.getElementById('experimentTabs');
         const tabItem = document.createElement('li');
@@ -122,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         experimentTabs.appendChild(tabItem);
     }
 
-    // Crea y carga el contenido para un experimento específico
     async function createExperimentContent(folderName, experimentType, expId) {
         try {
             const experimentTabsContent = document.getElementById('experimentTabsContent');
@@ -132,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
             tabContent.setAttribute('role', 'tabpanel');
             tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
 
-            // Cargar el archivo config.json
             const config = await fetchGitHubFile(`data/${experimentType}/${folderName}/config.json`);
             const descripcionHTML = `
                 <div class="row mb-3">
@@ -164,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             tabContent.innerHTML = configuracionHTML;
 
-            // Cargar la imagen del entorno
             const imagenEnvHTML = `
                 <div class="card my-4">
                     <div class="card-body text-center">
@@ -174,18 +163,14 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             tabContent.innerHTML += imagenEnvHTML;
 
-            // Crear el contenedor para los gráficos antes de llamar a loadChartData
             const chartsContainerId = `chartsContainer${expId}`;
             const chartsContainerHTML = `<div id="${chartsContainerId}" class="row my-4"></div>`;
             tabContent.innerHTML += chartsContainerHTML;
 
-            // Añadir el contenido de la pestaña al DOM antes de cargar los gráficos
             experimentTabsContent.appendChild(tabContent);
 
-            // Cargar los datos del gráfico
             await loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
 
-            // Cargar la imagen de resultados
             const imagenHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
@@ -198,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             tabContent.innerHTML += imagenHTML;
 
-            // Cargar los videos del experimento
             await loadExperimentVideos(folderName, experimentType, expId, tabContent);
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
@@ -230,10 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            container.innerHTML = ''; // Limpiar el contenedor
+            container.innerHTML = '';
             console.log("Contenedor encontrado y visible, cargando gráficos...");
 
-            // Agregar un gráfico de prueba para verificar si el contenedor funciona
             const testCanvas = document.createElement('canvas');
             testCanvas.width = container.clientWidth;
             testCanvas.height = 400;
@@ -252,15 +235,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 options: { responsive: true }
             });
-            console.log("Gráfico de prueba agregado al contenedor");
 
-            // Cargar los datos de tensorflow.json desde GitHub
             const decodedData = await fetchGitHubFile(jsonPath);
             console.log("Datos del gráfico cargados:", decodedData);
 
             let index = 0;
             for (const key in decodedData) {
-                const dataSubset = decodedData[key].slice(0, 50); // Limitar a 50 puntos para pruebas
+                const dataSubset = decodedData[key].slice(0, 50);
                 const chartWrapper = document.createElement('div');
                 chartWrapper.className = 'col-md-6 mb-4';
 
@@ -270,8 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 chartCanvas.height = 400;
                 chartWrapper.appendChild(chartCanvas);
                 container.appendChild(chartWrapper);
-
-                console.log(`Creando gráfica para "${key}" con datos:`, dataSubset);
 
                 new Chart(chartCanvas.getContext('2d'), {
                     type: 'line',
@@ -303,11 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Iniciar la carga de gráficos con el JSON de prueba
-    loadChartData('data/tensorflow.json', 'experimentTabsContent');
-});
-
-    // Carga y muestra los videos del experimento
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
         try {
             const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
