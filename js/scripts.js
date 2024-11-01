@@ -3,31 +3,74 @@ document.addEventListener('DOMContentLoaded', () => {
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
     const githubToken = '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'; // Reemplaza con tu token de acceso personal
 
-    // Función auxiliar para mostrar el indicador de carga
+    /**
+     * Muestra u oculta el indicador de carga.
+     * @param {boolean} show - Si es true, muestra el indicador; si es false, lo oculta.
+     */
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
-        loadingIndicator.style.display = show ? 'block' : 'none';
-    }
-
-    // Función auxiliar para realizar solicitudes a la API de GitHub con autenticación usando el token
-    async function fetchFromGitHubAPI(url) {
-        const headers = {
-            'Authorization': `token ${githubToken}`
-        };
-
-        const response = await fetch(url, { headers });
-        if (!response.ok) {
-            throw new Error(`Error de la API de GitHub: ${response.status} ${response.statusText}`);
+        if (loadingIndicator) {
+            loadingIndicator.style.display = show ? 'block' : 'none';
         }
-        return response.json();
     }
 
-    // Cargar las carpetas principales
+    /**
+     * Realiza una solicitud a la API de GitHub con autenticación opcional.
+     * Si recibe un error 401, reintenta sin autenticación.
+     * @param {string} url - La URL de la API de GitHub.
+     * @returns {Promise<Object>} - La respuesta JSON de la API.
+     */
+    async function fetchFromGitHubAPI(url) {
+        try {
+            const headers = githubToken ? { 'Authorization': `token ${githubToken}` } : {};
+            const response = await fetch(url, { headers });
+
+            if (response.status === 401) {
+                console.warn('Token de GitHub no válido o caducado. Continuando sin autenticación.');
+                return fetchFromGitHubAPIWithoutAuth(url);
+            }
+
+            if (!response.ok) {
+                throw new Error(`Error de la API de GitHub: ${response.status} ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error al realizar la solicitud a la API de GitHub:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Realiza una solicitud a la API de GitHub sin autenticación.
+     * @param {string} url - La URL de la API de GitHub.
+     * @returns {Promise<Object>} - La respuesta JSON de la API.
+     */
+    async function fetchFromGitHubAPIWithoutAuth(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error de la API de GitHub (sin autenticación): ${response.status} ${response.statusText}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error al realizar la solicitud a la API de GitHub sin autenticación:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Carga las carpetas principales desde GitHub y las agrega al menú lateral.
+     */
     async function loadMainFolders() {
         try {
             showLoading(true);
             const folders = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data`);
             const sidebarMenu = document.getElementById('sidebarMenu');
+            if (!sidebarMenu) {
+                console.error('No se encontró el elemento con ID sidebarMenu.');
+                return;
+            }
             sidebarMenu.innerHTML = ''; // Limpiar contenido existente
 
             const mainFolders = folders.filter(folder => folder.type === 'dir');
@@ -36,13 +79,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            mainFolders.forEach((folder, index) => {
+            mainFolders.forEach(folder => {
                 const listItem = document.createElement('li');
                 listItem.className = 'nav-item';
 
                 const link = document.createElement('a');
-                link.href = "#";
-                link.className = "nav-link";
+                link.href = '#';
+                link.className = 'nav-link';
                 link.textContent = folder.name;
 
                 link.addEventListener('click', async (e) => {
@@ -57,8 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Seleccionar y cargar la primera carpeta por defecto
             const firstLink = document.querySelector('#sidebarMenu .nav-link');
-            setActiveLink(firstLink);
-            await loadExperimentSet(mainFolders[0].name);
+            if (firstLink) {
+                setActiveLink(firstLink);
+                await loadExperimentSet(mainFolders[0].name);
+            }
         } catch (error) {
             console.error('Error al cargar carpetas principales:', error);
             alert('Hubo un error al cargar las carpetas principales. Por favor, inténtalo de nuevo más tarde.');
@@ -67,24 +112,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Resaltar el enlace activo en el menú lateral
+    /**
+     * Resalta el enlace activo en el menú lateral.
+     * @param {HTMLElement} selectedLink - El enlace que se debe resaltar.
+     */
     function setActiveLink(selectedLink) {
-        document.querySelectorAll('#sidebarMenu .nav-link').forEach(link => link.classList.remove('active'));
+        const links = document.querySelectorAll('#sidebarMenu .nav-link');
+        links.forEach(link => link.classList.remove('active'));
         selectedLink.classList.add('active');
     }
 
-    // Cargar el conjunto de experimentos para el tipo seleccionado
+    /**
+     * Carga el conjunto de experimentos para un tipo de experimento específico.
+     * @param {string} experimentType - El nombre del tipo de experimento.
+     */
     async function loadExperimentSet(experimentType) {
         try {
             showLoading(true);
-            document.getElementById('experimentTabs').innerHTML = '';
-            document.getElementById('experimentTabsContent').innerHTML = '';
+            const experimentTabs = document.getElementById('experimentTabs');
+            const experimentTabsContent = document.getElementById('experimentTabsContent');
+            if (!experimentTabs || !experimentTabsContent) {
+                console.error('No se encontraron los elementos experimentTabs o experimentTabsContent.');
+                return;
+            }
+
+            experimentTabs.innerHTML = '';
+            experimentTabsContent.innerHTML = '';
 
             const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${experimentType}`);
             const experimentFolders = data.filter(item => item.type === 'dir');
 
             if (experimentFolders.length === 0) {
-                document.getElementById('experimentTabsContent').innerHTML = '<p>No se encontraron experimentos.</p>';
+                experimentTabsContent.innerHTML = '<p>No se encontraron experimentos.</p>';
                 return;
             }
 
@@ -102,20 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Crear una pestaña para cada experimento
+    /**
+     * Crea una pestaña para un experimento.
+     * @param {string} folderName - El nombre de la carpeta del experimento.
+     * @param {number} expId - El ID del experimento.
+     */
     function createExperimentTab(folderName, expId) {
         const experimentTabs = document.getElementById('experimentTabs');
-        const tab = document.createElement('li');
-        tab.className = 'nav-item';
-        tab.innerHTML = `
+        const tabItem = document.createElement('li');
+        tabItem.className = 'nav-item';
+        tabItem.innerHTML = `
             <button class="nav-link ${expId === 1 ? 'active' : ''}" id="exp${expId}-tab" data-bs-toggle="tab" data-bs-target="#exp${expId}" type="button" role="tab" aria-controls="exp${expId}" aria-selected="${expId === 1}">
                 ${folderName}
             </button>
         `;
-        experimentTabs.appendChild(tab);
+        experimentTabs.appendChild(tabItem);
     }
 
-    // Crear y cargar el contenido para cada experimento
+    /**
+     * Crea y carga el contenido para un experimento específico.
+     * @param {string} folderName - El nombre de la carpeta del experimento.
+     * @param {string} experimentType - El tipo de experimento.
+     * @param {number} expId - El ID del experimento.
+     */
     async function createExperimentContent(folderName, experimentType, expId) {
         try {
             const experimentTabsContent = document.getElementById('experimentTabsContent');
@@ -176,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const chartsContainerHTML = `<div id="${chartsContainerId}" class="row my-4"></div>`;
             tabContent.innerHTML += chartsContainerHTML;
 
-            // Asegurarse de que el tabContent esté en el DOM antes de cargar los datos del gráfico
+            // Añadir el contenido de la pestaña al DOM antes de cargar los gráficos
             experimentTabsContent.appendChild(tabContent);
 
             // Cargar los datos del gráfico
@@ -197,14 +265,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Cargar los videos del experimento
             await loadExperimentVideos(folderName, experimentType, expId, tabContent);
-
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
         }
     }
 
-    // Función para cargar un archivo JSON desde GitHub
+    /**
+     * Carga un archivo JSON desde GitHub, manejando archivos grandes mediante download_url si es necesario.
+     * @param {string} path - La ruta del archivo en el repositorio.
+     * @returns {Promise<Object>} - El contenido del archivo JSON.
+     */
     async function fetchGitHubFile(path) {
         try {
             const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`);
@@ -227,7 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para cargar y mostrar los datos del gráfico
+    /**
+     * Carga y muestra los datos del gráfico utilizando Chart.js.
+     * @param {string} jsonPath - La ruta del archivo JSON con los datos del gráfico.
+     * @param {string} containerId - El ID del contenedor donde se insertarán los gráficos.
+     */
     async function loadChartData(jsonPath, containerId) {
         try {
             const container = document.getElementById(containerId);
@@ -286,7 +361,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para cargar y mostrar los videos del experimento
+    /**
+     * Carga y muestra los videos del experimento.
+     * @param {string} folderName - El nombre de la carpeta del experimento.
+     * @param {string} experimentType - El tipo de experimento.
+     * @param {number} expId - El ID del experimento.
+     * @param {HTMLElement} tabContent - El contenedor de la pestaña actual.
+     */
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
         try {
             const files = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/data/${experimentType}/${folderName}`);
@@ -296,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return; // No hay videos para mostrar
             }
 
-            const videoListHTML = videos.map((video) => `
+            const videoListHTML = videos.map(video => `
                 <a href="#" class="btn btn-outline-primary btn-sm m-1 video-link" data-video-src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}">
                     ${video.name}
                 </a>
@@ -328,12 +409,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     event.preventDefault();
                     const videoSrc = link.getAttribute('data-video-src');
                     const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
-                    mainVideo.src = videoSrc;
-                    mainVideo.play();
+                    if (mainVideo) {
+                        mainVideo.src = videoSrc;
+                        mainVideo.play();
+                    }
                 });
             });
         } catch (error) {
             console.error('Error al cargar los videos:', error);
+        }
+    }
+
+    /**
+     * Carga un archivo JSON desde GitHub, manejando archivos grandes mediante download_url si es necesario.
+     * @param {string} path - La ruta del archivo en el repositorio.
+     * @returns {Promise<Object>} - El contenido del archivo JSON.
+     */
+    async function fetchGitHubFile(path) {
+        try {
+            const data = await fetchFromGitHubAPI(`https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`);
+            let content = null;
+
+            if (data && data.content) {
+                content = atob(data.content);
+            } else if (data && data.download_url) {
+                const response = await fetch(data.download_url);
+                if (!response.ok) throw new Error(`Error al descargar el archivo: ${response.status} ${response.statusText}`);
+                content = await response.text();
+            } else {
+                throw new Error('Archivo no encontrado o formato incorrecto');
+            }
+
+            return JSON.parse(content);
+        } catch (error) {
+            console.error('Error al cargar el archivo JSON:', error);
+            throw error;
         }
     }
 
