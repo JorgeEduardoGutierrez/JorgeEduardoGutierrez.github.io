@@ -87,7 +87,7 @@ pre {
 
 #experimentTabsContent {
     min-height: 400px;
-    width: 100%;
+    width: 400px;
     border: 2px solid #333;
     padding: 20px;
     background-color: #f9f9f9;
@@ -95,7 +95,7 @@ pre {
 
 /* Estilos específicos para cada canvas de gráfico */
 canvas {
-    width: 100% !important;
+    width: 400px !important;
     height: 400px !important;
     border: 1px solid #007bff;
     background-color: #ffffff;
