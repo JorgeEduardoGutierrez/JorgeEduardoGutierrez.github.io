@@ -231,7 +231,10 @@ async function loadChartData(jsonPath, containerId) {
 
         // Agregar un gráfico de prueba para verificar si el contenedor funciona
         const testCanvas = document.createElement('canvas');
+        testCanvas.width = container.clientWidth; // Forzar ancho del contenedor
+        testCanvas.height = 400; // Forzar altura
         container.appendChild(testCanvas);
+        
         new Chart(testCanvas.getContext('2d'), {
             type: 'line',
             data: {
@@ -257,8 +260,11 @@ async function loadChartData(jsonPath, containerId) {
             const dataSubset = decodedData[key].slice(0, 50); // Limitar a 50 puntos de datos para evitar sobrecarga
             const chartWrapper = document.createElement('div');
             chartWrapper.className = 'col-md-6 mb-4';
+
             const chartCanvas = document.createElement('canvas');
             chartCanvas.id = `${containerId}_${index}`;
+            chartCanvas.width = container.clientWidth / 2 - 20; // Ajuste de ancho del canvas
+            chartCanvas.height = 400; // Ajuste de altura del canvas
             chartWrapper.appendChild(chartCanvas);
             container.appendChild(chartWrapper);
 
@@ -288,8 +294,7 @@ async function loadChartData(jsonPath, containerId) {
                 }
             });
 
-            // Forzar la actualización del gráfico (opcional, normalmente no necesario)
-            chart.update();
+            chart.update(); // Forzar la actualización del gráfico (opcional)
             index++;
 
             // Para pruebas, solo renderizar el primer gráfico y salir del bucle
@@ -299,7 +304,6 @@ async function loadChartData(jsonPath, containerId) {
         console.error('Error al cargar los datos del gráfico:', error);
     }
 }
-
 
     // Carga y muestra los videos del experimento
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
