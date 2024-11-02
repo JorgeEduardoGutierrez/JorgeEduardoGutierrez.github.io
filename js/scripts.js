@@ -80,12 +80,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await fetchFromGitHubAPI(`data/${experimentType}`);
             const experimentFolders = data.filter(item => item.type === 'dir');
 
+            if (experimentFolders.length === 0) {
+                experimentTabsContent.innerHTML = '<p>No hay experimentos disponibles.</p>';
+                return;
+            }
+
             experimentFolders.forEach((folder, index) => {
                 const expId = index + 1;
                 const isActive = index === 0; // La primera pestaña es la activa
                 createExperimentTab(folder.name, expId, isActive);
                 createExperimentContent(folder.name, experimentType, expId, isActive);
             });
+
+            // Forzar la activación de la primera pestaña para asegurarse de que se dispare el evento
+            const firstTabButton = document.querySelector(`#exp1-tab`);
+            if (firstTabButton) {
+                const tab = new bootstrap.Tab(firstTabButton);
+                tab.show();
+            }
         } catch (error) {
             console.error('Error al cargar los experimentos:', error);
             alert('Hubo un error al cargar los experimentos. Por favor, inténtalo de nuevo más tarde.');
@@ -165,16 +177,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const tabButton = document.querySelector(`#exp${expId}-tab`);
             if (tabButton) {
                 tabButton.addEventListener('shown.bs.tab', function(event) {
+                    console.log(`Cargando gráficos para: ${folderName}`);
                     loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
                 });
             }
 
             // Si la pestaña es activa, carga los gráficos después de un breve retraso
             if (isActive) {
-                // Utiliza requestAnimationFrame para asegurarte de que el canvas esté listo
-                requestAnimationFrame(() => {
+                setTimeout(() => {
+                    console.log(`Cargando gráficos para la pestaña activa: ${folderName}`);
                     loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
-                });
+                }, 100); // Retraso de 100ms
             }
 
             const imagenHTML = `
@@ -202,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(url);
             const data = await response.json();
             if (data && data.content) {
-                const decodedContent = atob(data.content);
+                const decodedContent = atob(data.content.replace(/\s/g, '')); // Eliminar espacios en blanco
                 return JSON.parse(decodedContent);
             }
             throw new Error('Contenido vacío o formato incorrecto');
@@ -225,6 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Carga los datos del archivo JSON
             const data = await fetchGitHubFile(jsonPath);
+            if (!data || Object.keys(data).length === 0) {
+                console.warn(`No se encontraron datos en ${jsonPath}.`);
+                container.innerHTML = '<p>No hay datos disponibles para mostrar los gráficos.</p>';
+                return;
+            }
 
             // Crea los gráficos para cada métrica
             const metrics = Object.keys(data);
@@ -232,35 +250,75 @@ document.addEventListener('DOMContentLoaded', () => {
             metrics.forEach((metric, index) => {
                 const canvasId = `chartCanvas${containerId}_${index}`;
                 const canvasWrapper = document.createElement('div');
-                canvasWrapper.className = 'col-md-6';
+                canvasWrapper.className = 'col-md-6 mb-4'; // Añadido margen inferior para separar los gráficos
                 const canvas = document.createElement('canvas');
                 canvas.id = canvasId;
                 canvasWrapper.appendChild(canvas);
                 container.appendChild(canvasWrapper);
 
-                // Asegurarse de que el canvas está en el DOM y visible
-                // Utiliza requestAnimationFrame para esperar hasta que el canvas esté renderizado
-                requestAnimationFrame(() => {
-                    const labels = data[metric].map((_, idx) => idx + 1);
+                // Verificar que el canvas esté en el DOM y visible antes de inicializar el gráfico
+                setTimeout(() => {
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) {
+                        console.error(`No se pudo obtener el contexto para el canvas ${canvasId}.`);
+                        return;
+                    }
+
+                    const labels = data[metric].map((_, idx) => `Punto ${idx + 1}`);
                     const chartData = {
                         labels: labels,
                         datasets: [{
                             label: metric,
                             data: data[metric],
                             borderColor: 'rgb(75, 192, 192)',
-                            fill: false
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: true,
+                            tension: 0.1
                         }]
                     };
 
-                    new Chart(canvas.getContext('2d'), {
+                    new Chart(ctx, {
                         type: 'line',
                         data: chartData,
-                        options: { responsive: true }
+                        options: { 
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: `Evolución de ${metric}`
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Iteración'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: metric
+                                    },
+                                    beginAtZero: true
+                                }
+                            }
+                        }
                     });
-                });
+
+                    console.log(`Gráfico creado: ${canvasId}`);
+                }, 100); // Retraso de 100ms para asegurar que el canvas esté visible
             });
         } catch (error) {
             console.error('Error en loadChartData:', error);
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = '<p>Error al cargar los datos del gráfico.</p>';
+            }
         }
     }
 
