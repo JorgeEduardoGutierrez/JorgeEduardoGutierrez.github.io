@@ -206,57 +206,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-async function loadChartData(jsonPath, containerId) {
-    try {
-        const container = document.getElementById(containerId);
-        
-        // Verifica si el contenedor existe y es visible
-        if (!container) {
-            console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
-            return;
-        }
-        console.log("Contenedor encontrado y visible, cargando gráficos...");
-
-        // Limpia el contenedor
-        container.innerHTML = '';
-
-        // Agrega un canvas de prueba directamente en el contenedor con dimensiones específicas
-        const testCanvas = document.createElement('canvas');
-        testCanvas.id = 'testCanvas';
-        testCanvas.style.width = '100%';
-        testCanvas.style.height = '400px';
-        container.appendChild(testCanvas);
-        console.log("Canvas de prueba agregado al contenedor");
-
-        // Verifica si el canvas de prueba se ha añadido correctamente
-        if (!document.getElementById('testCanvas')) {
-            console.error("No se pudo agregar el canvas de prueba al DOM.");
-            return;
-        }
-
-        // Intenta crear un gráfico en el canvas de prueba
+    async function loadChartData(jsonPath, containerId) {
         try {
-            new Chart(testCanvas.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: [1, 2, 3, 4, 5],
-                    datasets: [{
-                        label: 'Gráfico de Prueba',
-                        data: [1, 2, 3, 2, 1],
-                        borderColor: 'rgb(75, 192, 192)',
-                        fill: false
-                    }]
-                },
-                options: { responsive: true }
-            });
-            console.log("Gráfico de prueba agregado al canvas.");
-        } catch (chartError) {
-            console.error("Error al crear el gráfico de prueba:", chartError);
+            const container = document.getElementById(containerId);
+            
+            // Verifica si el contenedor existe y es visible
+            if (!container) {
+                console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
+                return;
+            }
+            console.log("Contenedor encontrado y visible, cargando gráficos...");
+    
+            // Limpia el contenedor
+            container.innerHTML = '';
+    
+            // Agrega un canvas de prueba directamente en el contenedor con dimensiones específicas
+            const testCanvas = document.createElement('canvas');
+            testCanvas.id = 'testCanvas';
+            testCanvas.style.width = '100%';
+            testCanvas.style.height = '400px';
+            container.appendChild(testCanvas);
+            console.log("Canvas de prueba agregado al contenedor");
+    
+            // Verifica si el canvas de prueba se ha añadido correctamente
+            if (!document.getElementById('testCanvas')) {
+                console.error("No se pudo agregar el canvas de prueba al DOM.");
+                return;
+            }
+    
+            // Intenta crear un gráfico en el canvas de prueba
+            try {
+                new Chart(testCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: [1, 2, 3, 4, 5],
+                        datasets: [{
+                            label: 'Gráfico de Prueba',
+                            data: [1, 2, 3, 2, 1],
+                            borderColor: 'rgb(75, 192, 192)',
+                            fill: false
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+                console.log("Gráfico de prueba agregado al canvas.");
+            } catch (chartError) {
+                console.error("Error al crear el gráfico de prueba:", chartError);
+            }
+        } catch (error) {
+            console.error('Error en loadChartData:', error);
         }
-    } catch (error) {
-        console.error('Error en loadChartData:', error);
     }
-}
 
     async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
         try {
