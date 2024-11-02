@@ -95,25 +95,32 @@ pre {
 
 /* Estilos específicos para cada canvas de gráfico */
 canvas {
-    width: 600px;
-    height: 400px;
+    width: 100% !important; /* Ocupa el 100% del ancho del contenedor */
+    height: 400px !important; /* Altura fija o ajusta según tus necesidades */
     border: 1px solid #007bff;
     background-color: #ffffff;
-    margin: 10px;
+    margin: 10px 0;
     box-sizing: border-box;
 }
 
-/* Estilos adicionales para gráficos individuales */
-.col-md-6 {
-    flex-basis: 45%;              /* Cada gráfico ocupa aproximadamente el 45% del ancho */
-    max-width: 600px;             /* Limitar el ancho máximo */
-    margin: 10px;
+/* Clase para el contenedor del gráfico */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 400px; /* Ajusta la altura según tus necesidades */
+    margin-bottom: 20px;
+}
+
+/* Clase personalizada para los contenedores de gráficos */
+.custom-chart-col {
+    margin-bottom: 20px; /* Espacio inferior entre gráficos */
     padding: 15px;
-    background-color: #ffffff;    /* Fondo blanco en el contenedor de gráficos */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para destacar el gráfico */
+    background-color: #ffffff;    /* Fondo blanco */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
     border-radius: 10px;
 }
 
+/* Footer styles */
 footer {
     background-color: #333;
     color: #fff;
