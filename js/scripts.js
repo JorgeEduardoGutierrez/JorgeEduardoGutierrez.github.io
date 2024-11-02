@@ -82,18 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             experimentFolders.forEach((folder, index) => {
                 const expId = index + 1;
-                createExperimentTab(folder.name, expId);
-                createExperimentContent(folder.name, experimentType, expId);
+                const isActive = index === 0; // La primera pestaña es la activa
+                createExperimentTab(folder.name, expId, isActive);
+                createExperimentContent(folder.name, experimentType, expId, isActive);
             });
-
-            const firstTab = document.querySelector('#experimentTabs .nav-link');
-            if (firstTab) {
-                firstTab.classList.add('active');
-                const firstTabContent = document.querySelector('#experimentTabsContent .tab-pane');
-                if (firstTabContent) {
-                    firstTabContent.classList.add('show', 'active');
-                }
-            }
         } catch (error) {
             console.error('Error al cargar los experimentos:', error);
             alert('Hubo un error al cargar los experimentos. Por favor, inténtalo de nuevo más tarde.');
@@ -102,23 +94,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function createExperimentTab(folderName, expId) {
+    function createExperimentTab(folderName, expId, isActive) {
         const experimentTabs = document.getElementById('experimentTabs');
         const tabItem = document.createElement('li');
         tabItem.className = 'nav-item';
         tabItem.innerHTML = `
-            <button class="nav-link" id="exp${expId}-tab" data-bs-toggle="tab" data-bs-target="#exp${expId}" type="button" role="tab" aria-controls="exp${expId}" aria-selected="false">
+            <button class="nav-link ${isActive ? 'active' : ''}" id="exp${expId}-tab" data-bs-toggle="tab" data-bs-target="#exp${expId}" type="button" role="tab" aria-controls="exp${expId}" aria-selected="${isActive ? 'true' : 'false'}">
                 ${folderName}
             </button>
         `;
         experimentTabs.appendChild(tabItem);
     }
 
-    async function createExperimentContent(folderName, experimentType, expId) {
+    async function createExperimentContent(folderName, experimentType, expId, isActive) {
         try {
             const experimentTabsContent = document.getElementById('experimentTabsContent');
             const tabContent = document.createElement('div');
-            tabContent.className = `tab-pane fade`;
+            tabContent.className = `tab-pane fade ${isActive ? 'show active' : ''}`;
             tabContent.id = `exp${expId}`;
             tabContent.setAttribute('role', 'tabpanel');
             tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
@@ -169,7 +161,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             experimentTabsContent.appendChild(tabContent);
 
-            await loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
+            // Agrega el event listener para cargar los gráficos cuando la pestaña se muestre
+            const tabButton = document.querySelector(`#exp${expId}-tab`);
+            if (tabButton) {
+                tabButton.addEventListener('shown.bs.tab', function(event) {
+                    loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
+                });
+            }
+
+            // Si la pestaña es activa, carga los gráficos inmediatamente
+            if (isActive) {
+                loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
+            }
 
             const imagenHTML = `
                 <div class="card my-4">
@@ -209,48 +212,44 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadChartData(jsonPath, containerId) {
         try {
             const container = document.getElementById(containerId);
-            
-            // Verifica si el contenedor existe y es visible
             if (!container) {
                 console.error(`Contenedor con ID ${containerId} no encontrado en el DOM.`);
                 return;
             }
-            console.log("Contenedor encontrado y visible, cargando gráficos...");
-    
+
             // Limpia el contenedor
             container.innerHTML = '';
-    
-            // Agrega un canvas de prueba directamente en el contenedor con dimensiones específicas
-            const testCanvas = document.createElement('canvas');
-            testCanvas.id = 'testCanvas';
-            container.appendChild(testCanvas);
-            console.log("Canvas de prueba agregado al contenedor");
-    
-            // Verifica si el canvas de prueba se ha añadido correctamente
-            if (!document.getElementById('testCanvas')) {
-                console.error("No se pudo agregar el canvas de prueba al DOM.");
-                return;
-            }
-    
-            // Intenta crear un gráfico en el canvas de prueba
-            try {
-                new Chart(testCanvas.getContext('2d'), {
+
+            // Carga los datos del archivo JSON
+            const data = await fetchGitHubFile(jsonPath);
+
+            // Crea los gráficos para cada métrica
+            const metrics = Object.keys(data);
+
+            metrics.forEach((metric, index) => {
+                const canvasId = `chartCanvas${containerId}_${index}`;
+                const canvas = document.createElement('canvas');
+                canvas.id = canvasId;
+                canvas.className = 'col-md-6';
+                container.appendChild(canvas);
+
+                const labels = data[metric].map((_, idx) => idx + 1);
+                const chartData = {
+                    labels: labels,
+                    datasets: [{
+                        label: metric,
+                        data: data[metric],
+                        borderColor: 'rgb(75, 192, 192)',
+                        fill: false
+                    }]
+                };
+
+                new Chart(canvas.getContext('2d'), {
                     type: 'line',
-                    data: {
-                        labels: [1, 2, 3, 4, 5],
-                        datasets: [{
-                            label: 'Gráfico de Prueba',
-                            data: [1, 2, 3, 2, 1],
-                            borderColor: 'rgb(75, 192, 192)',
-                            fill: false
-                        }]
-                    },
+                    data: chartData,
                     options: { responsive: true }
                 });
-                console.log("Gráfico de prueba agregado al canvas.");
-            } catch (chartError) {
-                console.error("Error al crear el gráfico de prueba:", chartError);
-            }
+            });
         } catch (error) {
             console.error('Error en loadChartData:', error);
         }
