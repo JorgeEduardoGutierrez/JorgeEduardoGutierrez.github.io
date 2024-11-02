@@ -96,7 +96,7 @@ pre {
 /* Estilos específicos para cada canvas de gráfico */
 canvas {
     width: 100% !important;
-    min-height: 400px !important;
+    height: 400px !important;
     border: 1px solid #007bff;
     background-color: #ffffff;
     margin: 10px;
