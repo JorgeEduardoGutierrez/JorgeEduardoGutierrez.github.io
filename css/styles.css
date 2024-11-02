@@ -86,7 +86,7 @@ pre {
 }
 
 #experimentTabsContent {
-    height: 400px;
+    min-height: 400px;
     width: 100%;
     border: 2px solid #333;
     padding: 20px;
