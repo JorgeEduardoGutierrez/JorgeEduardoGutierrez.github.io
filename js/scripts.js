@@ -169,9 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Si la pestaña es activa, carga los gráficos inmediatamente
+            // Si la pestaña es activa, carga los gráficos después de un breve retraso
             if (isActive) {
-                loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
+                // Utiliza requestAnimationFrame para asegurarte de que el canvas esté listo
+                requestAnimationFrame(() => {
+                    loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
+                });
             }
 
             const imagenHTML = `
@@ -228,26 +231,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
             metrics.forEach((metric, index) => {
                 const canvasId = `chartCanvas${containerId}_${index}`;
+                const canvasWrapper = document.createElement('div');
+                canvasWrapper.className = 'col-md-6';
                 const canvas = document.createElement('canvas');
                 canvas.id = canvasId;
-                canvas.className = 'col-md-6';
-                container.appendChild(canvas);
+                canvasWrapper.appendChild(canvas);
+                container.appendChild(canvasWrapper);
 
-                const labels = data[metric].map((_, idx) => idx + 1);
-                const chartData = {
-                    labels: labels,
-                    datasets: [{
-                        label: metric,
-                        data: data[metric],
-                        borderColor: 'rgb(75, 192, 192)',
-                        fill: false
-                    }]
-                };
+                // Asegurarse de que el canvas está en el DOM y visible
+                // Utiliza requestAnimationFrame para esperar hasta que el canvas esté renderizado
+                requestAnimationFrame(() => {
+                    const labels = data[metric].map((_, idx) => idx + 1);
+                    const chartData = {
+                        labels: labels,
+                        datasets: [{
+                            label: metric,
+                            data: data[metric],
+                            borderColor: 'rgb(75, 192, 192)',
+                            fill: false
+                        }]
+                    };
 
-                new Chart(canvas.getContext('2d'), {
-                    type: 'line',
-                    data: chartData,
-                    options: { responsive: true }
+                    new Chart(canvas.getContext('2d'), {
+                        type: 'line',
+                        data: chartData,
+                        options: { responsive: true }
+                    });
                 });
             });
         } catch (error) {
