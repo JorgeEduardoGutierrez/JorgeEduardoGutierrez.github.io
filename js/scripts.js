@@ -223,8 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Agrega un canvas de prueba directamente en el contenedor con dimensiones específicas
             const testCanvas = document.createElement('canvas');
             testCanvas.id = 'testCanvas';
-            testCanvas.style.width = '100%';
-            testCanvas.style.height = '400px';
             container.appendChild(testCanvas);
             console.log("Canvas de prueba agregado al contenedor");
     
