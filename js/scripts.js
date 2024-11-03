@@ -144,11 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="card-body">
                         ${descripcionHTML}
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <h5>Entrenamiento</h5>
                                 <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <h5>Test</h5>
                                 <pre>${Object.entries(config.Test).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
                             </div>
@@ -249,14 +249,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             metrics.forEach((metric, index) => {
                 const canvasId = `chartCanvas${containerId}_${index}`;
-                const canvasWrapper = document.createElement('div');
-                canvasWrapper.className = 'col-md-6 mb-4'; // Añadido margen inferior para separar los gráficos
+                
+                // Crear la columna para el gráfico
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-6 mb-4 custom-chart-col'; // Usar clase personalizada
+
+                // Crear el contenedor del gráfico
+                const chartContainer = document.createElement('div');
+                chartContainer.className = 'chart-container';
+
+                // Crear el canvas
                 const canvas = document.createElement('canvas');
                 canvas.id = canvasId;
-                canvasWrapper.appendChild(canvas);
-                container.appendChild(canvasWrapper);
+                chartContainer.appendChild(canvas);
+                colDiv.appendChild(chartContainer);
+                container.appendChild(colDiv);
 
-                // Verificar que el canvas esté en el DOM y visible antes de inicializar el gráfico
+                // Inicializar el gráfico después de asegurarse de que el canvas esté visible
                 setTimeout(() => {
                     const ctx = canvas.getContext('2d');
                     if (!ctx) {
