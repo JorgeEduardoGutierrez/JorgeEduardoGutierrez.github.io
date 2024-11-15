@@ -273,12 +273,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         return;
                     }
 
-                    const labels = data[metric].map((_, idx) => `Punto ${idx + 1}`);
+                    // const labels = data[metric].map((_, idx) => `Punto ${idx + 1}`);
+                    // const chartData = {
+                    //     labels: labels,
+                    //     datasets: [{
+                    //         label: metric,
+                    //         data: data[metric],
+                    //         borderColor: 'rgb(75, 192, 192)',
+                    //         backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    //         fill: true,
+                    //         tension: 0.1
+                    //     }]
+                    // };
+
+                    const indices = data[metric].indices; // Tomar los índices originales
+                    const values = data[metric].values;
+    
                     const chartData = {
-                        labels: labels,
+                        labels: indices,
                         datasets: [{
                             label: metric,
-                            data: data[metric],
+                            data: values,
                             borderColor: 'rgb(75, 192, 192)',
                             backgroundColor: 'rgba(75, 192, 192, 0.2)',
                             fill: true,
