@@ -7,16 +7,14 @@
         "Acciones": "Vector de dimension 2, controlando la velocidad de las ruedas desde -1 a 1"
     },
     "Entrenamiento": {
-    	"Tiempo de entrenamiento": "2.048 horas",
-    	"Episodios": "8000",
-    	"Steps": "628,999",
-        "Rewards": "Reward shape basado en difusion en no estados terminales",
+    	"Tiempo de entrenamiento": "12.76 horas",
+    	"Episodios": "12,000",
+    	"Steps": "2,463,169",
         "Rewards": "100 al alcanzar meta, -1e-25 al tocar obstaculos, en estados terminales",
         "Steps por episodio": "300",
         "Maximo tamaño de Replay memory": "1,000,000",
         "Mini batch": "256",
-        
-        "Alpha": "Entriopia 0.02",
+        "Alpha": "Entriopia 0.2",
         "Gamma": "Factor de descuento 0.99",
         "Grid size": "300 300 1",
         "Mujoco map size": "15 15",

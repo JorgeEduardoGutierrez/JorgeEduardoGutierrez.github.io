@@ -8,7 +8,7 @@
     },
     "Entrenamiento": {
     	"Tiempo de entrenamiento": "2.048 horas",
-    	"Episodios": "8000",
+    	"Episodios": "9,311",
     	"Steps": "628,999",
         "Rewards": "Reward shape basado en difusion, solo en estados NO terminales",
         "Rewards": "100 al alcanzar meta, -1e-25 al tocar obstaculos, en estados terminales",
