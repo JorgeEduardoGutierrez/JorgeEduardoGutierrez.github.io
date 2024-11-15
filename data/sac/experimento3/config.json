@@ -1,0 +1,29 @@
+{
+    "Descripcion": {
+        "Observacion": "Vector de 5x1, los ultimos 1 estados, compuestos por 3 posiciones del robot {x, y, theta}, y coordenadas de la meta {x, y}",
+        "Metas": "UNA META, POSICION FIJA",
+        "Obstaculos": "BORDES DEL MAPA Y BOXES",
+        "Posicion inicial": "POSICION FIJA",
+        "Acciones": "Vector de dimension 2, controlando la velocidad de las ruedas desde -1 a 1"
+    },
+    "Entrenamiento": {
+    	"Tiempo de entrenamiento": "2.048 horas",
+    	"Episodios": "8000",
+    	"Steps": "628,999",
+        "Rewards": "Reward shape basado en difusion, solo en estados NO terminales",
+        "Rewards": "100 al alcanzar meta, -1e-25 al tocar obstaculos, en estados terminales",
+        "Steps por episodio": "300",
+        "Maximo tamaño de Replay memory": "1,000,000",
+        "Mini batch": "256",
+        
+        "Alpha": "Entriopia 0.02",
+        "Gamma": "Factor de descuento 0.99",
+        "Grid size": "300 300 1",
+        "Mujoco map size": "15 15",
+        "Ultimos estados en observacion": "1"
+    },
+    "Test": {
+        "Entornos": "1000 episodios, con el entorno configurado igual cada vez",
+        "Maximos steps por episodio": "107"
+    }
+}
