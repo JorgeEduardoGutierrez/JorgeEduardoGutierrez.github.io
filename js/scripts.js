@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-        function createMainTab(experimentType) {
+    function createMainTab(experimentType) {
         const experimentTabs = document.getElementById('experimentTabs');
         const experimentTabsContent = document.getElementById('experimentTabsContent');
 
@@ -188,6 +188,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         experimentTabsContent.appendChild(tabContent);
     }
+
+    async function loadPlotlyChart(jsonPath, containerId) {
+        try {
+            const data = await fetchGitHubFile(jsonPath); // Obtener datos desde GitHub
+            const container = document.getElementById(containerId);
+    
+            if (!container) {
+                console.error(`Contenedor ${containerId} no encontrado.`);
+                return;
+            }
+    
+            // Crear trazas para el gráfico
+            const traces = Object.keys(data).map(metric => ({
+                x: data[metric].indices,
+                y: data[metric].values,
+                mode: 'lines',
+                name: metric
+            }));
+    
+            // Renderizar el gráfico
+            Plotly.newPlot(containerId, traces, {
+                title: 'Gráfica Interactiva',
+                xaxis: { title: 'Iteración' },
+                yaxis: { title: 'Valores' }
+            });
+        } catch (error) {
+            console.error('Error al cargar el gráfico de Plotly:', error);
+        }
+    }
+
 
     function createExperimentTab(folderName, expId, isActive) {
         const experimentTabs = document.getElementById('experimentTabs');
