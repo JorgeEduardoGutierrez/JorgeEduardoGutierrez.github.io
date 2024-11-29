@@ -168,18 +168,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
     
-                // Agregar iframe para el archivo plotly_graph.html
-                const plotlyHTML = `
+                // Agregar el primer gráfico (Training Statistics)
+                const trainingHTML = `
                     <div class="card my-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h2>Gráfica Interactiva</h2>
+                        <div class="card-header bg-primary text-white">
+                            <h2>Training Statistics</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/plotly_graph.html" width="100%" height="600" frameborder="0"></iframe>
+                            <iframe src="data/${experimentType}/main/plotly_tensorboard.html" width="100%" height="600" frameborder="0"></iframe>
                         </div>
                     </div>
                 `;
-                tabContent.innerHTML = descripcionHTML + entrenamientoHTML + testHTML + plotlyHTML;
+    
+                // Agregar el segundo gráfico (Test Results)
+                const testResultsHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-success text-white">
+                            <h2>Test Results</h2>
+                        </div>
+                        <div class="card-body text-center">
+                            <iframe src="data/${experimentType}/main/plotly_results.html" width="100%" height="600" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                `;
+    
+                // Unir todo el contenido
+                tabContent.innerHTML = descripcionHTML + entrenamientoHTML + testHTML + trainingHTML + testResultsHTML;
             })
             .catch(error => {
                 console.error('Error al cargar el contenido de la pestaña principal:', error);
@@ -188,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         experimentTabsContent.appendChild(tabContent);
     }
+
 
     async function loadPlotlyChart(jsonPath, containerId) {
         try {
