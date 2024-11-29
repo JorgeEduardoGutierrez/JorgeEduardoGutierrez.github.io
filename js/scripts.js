@@ -99,12 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 createExperimentContent(folder.name, experimentType, expId, isActive);
             });
     
-            // Activar la primera pestaña
-            const firstTabButton = document.querySelector(`#exp1-tab`);
-            if (firstTabButton) {
+            // Activar la pestaña Main si existe, o la primera de los experimentos
+            if (document.querySelector(`#main-tab`)) {
+                const mainTab = document.querySelector(`#main-tab`);
+                const tab = new bootstrap.Tab(mainTab);
+                tab.show();
+            } else if (document.querySelector(`#exp1-tab`)) {
+                const firstTabButton = document.querySelector(`#exp1-tab`);
                 const tab = new bootstrap.Tab(firstTabButton);
                 tab.show();
             }
+            
         } catch (error) {
             console.error('Error al cargar los experimentos:', error);
             alert('Hubo un error al cargar los experimentos. Por favor, inténtalo de nuevo más tarde.');
