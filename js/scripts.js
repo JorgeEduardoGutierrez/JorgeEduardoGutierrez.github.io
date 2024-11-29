@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabItem.className = 'nav-item';
         tabItem.innerHTML = `
             <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">
-                Configuración Principal
+                Main
             </button>
         `;
         experimentTabs.appendChild(tabItem);
@@ -254,88 +254,87 @@ document.addEventListener('DOMContentLoaded', () => {
             tabContent.id = `exp${expId}`;
             tabContent.setAttribute('role', 'tabpanel');
             tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
-
-            const config = await fetchGitHubFile(`data/${experimentType}/${folderName}/config.json`);
-            const descripcionHTML = `
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <h5>Descripción</h5>
-                        <pre>${Object.entries(config.Descripcion).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                    </div>
-                </div>
-            `;
-            const configuracionHTML = `
+    
+            // Eliminar la primera imagen (antes iba aquí)
+    
+            // Subir la sección de videos
+            const videoSectionHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
-                        <h2>Configuración del Entorno</h2>
+                        <h2>Videos del Experimento</h2>
                     </div>
                     <div class="card-body">
-                        ${descripcionHTML}
-                        <div class="row">
-                            <div class="col-12 col-md-6">
-                                <h5>Entrenamiento</h5>
-                                <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <h5>Test</h5>
-                                <pre>${Object.entries(config.Test).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                            </div>
+                        <div id="videoList${expId}" class="mb-3"></div>
+                        <div class="ratio ratio-16x9">
+                            <video id="mainVideo${expId}" controls>
+                                <!-- Este video será dinámico -->
+                            </video>
                         </div>
                     </div>
                 </div>
             `;
-            tabContent.innerHTML = configuracionHTML;
-
-            const imagenEnvHTML = `
-                <div class="card my-4">
-                    <div class="card-body text-center">
-                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/env.png" alt="Imagen de Entorno" class="img-fluid">
-                    </div>
-                </div>
-            `;
-            tabContent.innerHTML += imagenEnvHTML;
-
-            const chartsContainerId = `chartsContainer${expId}`;
-            const chartsContainerHTML = `<div id="${chartsContainerId}" class="row my-4"></div>`;
-            tabContent.innerHTML += chartsContainerHTML;
-
-            experimentTabsContent.appendChild(tabContent);
-
-            // Agrega el event listener para cargar los gráficos cuando la pestaña se muestre
-            const tabButton = document.querySelector(`#exp${expId}-tab`);
-            if (tabButton) {
-                tabButton.addEventListener('shown.bs.tab', function(event) {
-                    console.log(`Cargando gráficos para: ${folderName}`);
-                    loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
+            tabContent.innerHTML += videoSectionHTML;
+    
+            // Cargar videos dinámicamente
+            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
+            const videos = files.filter(file => file.name.endsWith('.mp4'));
+    
+            const videoList = tabContent.querySelector(`#videoList${expId}`);
+            const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
+    
+            if (videos.length > 0) {
+                videos.forEach((video, index) => {
+                    const videoButton = document.createElement('button');
+                    videoButton.className = 'btn btn-outline-primary btn-sm m-1';
+                    videoButton.textContent = video.name;
+                    videoButton.addEventListener('click', () => {
+                        mainVideo.src = `https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}`;
+                        mainVideo.play();
+                    });
+                    videoList.appendChild(videoButton);
+    
+                    // Establecer el primer video como predeterminado
+                    if (index === 0) {
+                        mainVideo.src = `https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}`;
+                    }
                 });
+            } else {
+                videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
-
-            // Si la pestaña es activa, carga los gráficos después de un breve retraso
-            if (isActive) {
-                setTimeout(() => {
-                    console.log(`Cargando gráficos para la pestaña activa: ${folderName}`);
-                    loadChartData(`data/${experimentType}/${folderName}/tensorflow.json`, chartsContainerId);
-                }, 100); // Retraso de 100ms
-            }
-
-            const imagenHTML = `
+    
+            // Mostrar la segunda imagen (gráfica de resultados)
+            const testResultsHTML = `
                 <div class="card my-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h2>Gráfica resultados del test del modelo aprendido</h2>
+                    <div class="card-header bg-success text-white">
+                        <h2>Gráfica de Resultados</h2>
                     </div>
                     <div class="card-body text-center">
-                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/pie_chart.png" alt="Pie Chart" class="img-fluid">
+                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/pie_chart.png" alt="Gráfica de Resultados" class="img-fluid">
                     </div>
                 </div>
             `;
-            tabContent.innerHTML += imagenHTML;
-
-            await loadExperimentVideos(folderName, experimentType, expId, tabContent);
+            tabContent.innerHTML += testResultsHTML;
+    
+            // Cargar el gráfico interactivo desde plotly_tensorboard.html
+            const plotlyHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2>Training Statistics</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <iframe src="data/${experimentType}/${folderName}/plotly_tensorboard.html" width="100%" height="600" frameborder="0"></iframe>
+                    </div>
+                </div>
+            `;
+            tabContent.innerHTML += plotlyHTML;
+    
+            experimentTabsContent.appendChild(tabContent);
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
         }
     }
+
 
     async function fetchGitHubFile(path) {
         const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
