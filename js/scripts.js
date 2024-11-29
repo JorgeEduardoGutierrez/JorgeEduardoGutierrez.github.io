@@ -113,10 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function createMainTab(experimentType) {
+        function createMainTab(experimentType) {
         const experimentTabs = document.getElementById('experimentTabs');
         const experimentTabsContent = document.getElementById('experimentTabsContent');
-    
+
         // Crear la pestaña
         const tabItem = document.createElement('li');
         tabItem.className = 'nav-item';
@@ -126,15 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
             </button>
         `;
         experimentTabs.appendChild(tabItem);
-    
+
         // Crear el contenido de la pestaña
         const tabContent = document.createElement('div');
         tabContent.className = 'tab-pane fade show active';
         tabContent.id = 'main';
         tabContent.setAttribute('role', 'tabpanel');
         tabContent.setAttribute('aria-labelledby', 'main-tab');
-    
-        // Cargar configuración desde `main/config.json`
+
         fetchGitHubFile(`data/${experimentType}/main/config.json`)
             .then(config => {
                 const descripcionHTML = `
@@ -173,17 +172,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2>Gráfica Interactiva</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/main/plotly_graph.html" width="100%" height="600" frameborder="0"></iframe>
+                            <div id="plotlyContainer" style="width: 100%; height: 600px;"></div>
                         </div>
                     </div>
                 `;
                 tabContent.innerHTML = descripcionHTML + entrenamientoHTML + testHTML + plotlyHTML;
+
+                // Renderizar gráfico con Plotly
+                loadPlotlyChart(`data/${experimentType}/main/plotly_data.json`, 'plotlyContainer');
             })
             .catch(error => {
                 console.error('Error al cargar el contenido de la pestaña principal:', error);
                 tabContent.innerHTML = '<p>Error al cargar la configuración principal.</p>';
             });
-    
+
         experimentTabsContent.appendChild(tabContent);
     }
 
