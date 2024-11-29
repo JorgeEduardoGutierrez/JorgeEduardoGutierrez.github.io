@@ -76,23 +76,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const experimentTabsContent = document.getElementById('experimentTabsContent');
             experimentTabs.innerHTML = '';
             experimentTabsContent.innerHTML = '';
-
+    
             const data = await fetchFromGitHubAPI(`data/${experimentType}`);
-            const experimentFolders = data.filter(item => item.type === 'dir');
-
+            const mainFolder = data.find(item => item.type === 'dir' && item.name === 'main');
+            const experimentFolders = data.filter(item => item.type === 'dir' && item.name !== 'main');
+    
+            // Cargar contenido de 'main' si existe
+            if (mainFolder) {
+                createMainTab(experimentType);
+            }
+    
+            // Cargar otros experimentos
             if (experimentFolders.length === 0) {
                 experimentTabsContent.innerHTML = '<p>No hay experimentos disponibles.</p>';
                 return;
             }
-
+    
             experimentFolders.forEach((folder, index) => {
                 const expId = index + 1;
-                const isActive = index === 0; // La primera pestaña es la activa
+                const isActive = index === 0 && !mainFolder; // La primera pestaña activa, salvo que exista 'main'
                 createExperimentTab(folder.name, expId, isActive);
                 createExperimentContent(folder.name, experimentType, expId, isActive);
             });
-
-            // Forzar la activación de la primera pestaña para asegurarse de que se dispare el evento
+    
+            // Activar la primera pestaña
             const firstTabButton = document.querySelector(`#exp1-tab`);
             if (firstTabButton) {
                 const tab = new bootstrap.Tab(firstTabButton);
@@ -104,6 +111,80 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             showLoading(false);
         }
+    }
+
+    function createMainTab(experimentType) {
+        const experimentTabs = document.getElementById('experimentTabs');
+        const experimentTabsContent = document.getElementById('experimentTabsContent');
+    
+        // Crear la pestaña
+        const tabItem = document.createElement('li');
+        tabItem.className = 'nav-item';
+        tabItem.innerHTML = `
+            <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">
+                Configuración Principal
+            </button>
+        `;
+        experimentTabs.appendChild(tabItem);
+    
+        // Crear el contenido de la pestaña
+        const tabContent = document.createElement('div');
+        tabContent.className = 'tab-pane fade show active';
+        tabContent.id = 'main';
+        tabContent.setAttribute('role', 'tabpanel');
+        tabContent.setAttribute('aria-labelledby', 'main-tab');
+    
+        // Cargar configuración desde `main/config.json`
+        fetchGitHubFile(`data/${experimentType}/main/config.json`)
+            .then(config => {
+                const descripcionHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h2>Descripción</h2>
+                        </div>
+                        <div class="card-body">
+                            <pre>${Object.entries(config.Descripcion).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                        </div>
+                    </div>
+                `;
+                const entrenamientoHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h2>Entrenamiento</h2>
+                        </div>
+                        <div class="card-body">
+                            <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                        </div>
+                    </div>
+                `;
+                const testHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h2>Test</h2>
+                        </div>
+                        <div class="card-body">
+                            <pre>${Object.entries(config.Test).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                        </div>
+                    </div>
+                `;
+                const plotlyHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h2>Gráfica Interactiva</h2>
+                        </div>
+                        <div class="card-body text-center">
+                            <iframe src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/main/plotly_graph.html" width="100%" height="600" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                `;
+                tabContent.innerHTML = descripcionHTML + entrenamientoHTML + testHTML + plotlyHTML;
+            })
+            .catch(error => {
+                console.error('Error al cargar el contenido de la pestaña principal:', error);
+                tabContent.innerHTML = '<p>Error al cargar la configuración principal.</p>';
+            });
+    
+        experimentTabsContent.appendChild(tabContent);
     }
 
     function createExperimentTab(folderName, expId, isActive) {
