@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </a>
             ).join('');
 
-            const videosHTML = 
+            const videosHTML = '
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
                         <h2>Videos del Experimento</h2>
@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </video>
                         </div>
                     </div>
-                </div>
+                </div>'
             ;
 
             tabContent.innerHTML += videosHTML;
