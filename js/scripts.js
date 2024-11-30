@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
-    
+
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
         if (loadingIndicator) {
@@ -10,11 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchFromGitHubAPI(path) {
-        const url = https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path};
+        const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(Error de GitHub API: ${response.status} ${response.statusText});
+                throw new Error(`Error de GitHub API: ${response.status} ${response.statusText}`);
             }
             return await response.json();
         } catch (error) {
@@ -77,23 +77,25 @@ document.addEventListener('DOMContentLoaded', () => {
             experimentTabs.innerHTML = '';
             experimentTabsContent.innerHTML = '';
 
-            const data = await fetchFromGitHubAPI(data/${experimentType});
-            const experimentFolders = data.filter(item => item.type === 'dir');
+            const data = await fetchFromGitHubAPI(`data/${experimentType}`);
+            const mainFolder = data.find(item => item.type === 'dir' && item.name === 'main');
+            const experimentFolders = data.filter(item => item.type === 'dir' && item.name !== 'main');
 
-            if (experimentFolders.length === 0) {
-                experimentTabsContent.innerHTML = '<p>No hay experimentos disponibles.</p>';
-                return;
+            // Cargar contenido de 'main' si existe
+            if (mainFolder) {
+                createMainTab(experimentType);
             }
 
+            // Cargar otros experimentos
             experimentFolders.forEach((folder, index) => {
                 const expId = index + 1;
-                const isActive = index === 0; // La primera pestaña es la activa
+                const isActive = index === 0 && !mainFolder; // Activo solo si no hay 'main'
                 createExperimentTab(folder.name, expId, isActive);
                 createExperimentContent(folder.name, experimentType, expId, isActive);
             });
 
-            // Forzar la activación de la primera pestaña para asegurarse de que se dispare el evento
-            const firstTabButton = document.querySelector(#exp1-tab);
+            // Activar la primera pestaña
+            const firstTabButton = document.querySelector(`#exp1-tab`);
             if (firstTabButton) {
                 const tab = new bootstrap.Tab(firstTabButton);
                 tab.show();
@@ -105,6 +107,98 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading(false);
         }
     }
+
+    function createMainTab(experimentType) {
+        const experimentTabs = document.getElementById('experimentTabs');
+        const experimentTabsContent = document.getElementById('experimentTabsContent');
+    
+        // Crear la pestaña
+        const tabItem = document.createElement('li');
+        tabItem.className = 'nav-item';
+        tabItem.innerHTML = `
+            <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">
+                Configuración Principal
+            </button>
+        `;
+        experimentTabs.appendChild(tabItem);
+    
+        // Crear el contenido de la pestaña
+        const tabContent = document.createElement('div');
+        tabContent.className = 'tab-pane fade show active';
+        tabContent.id = 'main';
+        tabContent.setAttribute('role', 'tabpanel');
+        tabContent.setAttribute('aria-labelledby', 'main-tab');
+    
+        fetchGitHubFile(`data/${experimentType}/main/config.json`)
+            .then(config => {
+                // Agregar Descripción, Entrenamiento y Test
+                const descripcionHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h2>Descripción</h2>
+                        </div>
+                        <div class="card-body">
+                            <pre>${Object.entries(config.Descripcion).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                        </div>
+                    </div>
+                `;
+                const entrenamientoHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h2>Entrenamiento</h2>
+                        </div>
+                        <div class="card-body">
+                            <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                        </div>
+                    </div>
+                `;
+                const testHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h2>Test</h2>
+                        </div>
+                        <div class="card-body">
+                            <pre>${Object.entries(config.Test).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
+                        </div>
+                    </div>
+                `;
+    
+                // Agregar el primer gráfico (Training Statistics)
+                const trainingHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-primary text-white">
+                            <h2>Training Statistics</h2>
+                        </div>
+                        <div class="card-body text-center">
+                            <iframe src="data/${experimentType}/main/plotly_tensorboard.html" width="100%" height="600" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                `;
+    
+                // Agregar el segundo gráfico (Test Results)
+                const testResultsHTML = `
+                    <div class="card my-4">
+                        <div class="card-header bg-success text-white">
+                            <h2>Test Results</h2>
+                        </div>
+                        <div class="card-body text-center">
+                            <iframe src="data/${experimentType}/main/plotly_results.html" width="100%" height="600" frameborder="0"></iframe>
+                        </div>
+                    </div>
+                `;
+    
+                // Unir todo el contenido
+                tabContent.innerHTML = descripcionHTML + entrenamientoHTML + testHTML + trainingHTML + testResultsHTML;
+            })
+            .catch(error => {
+                console.error('Error al cargar el contenido de la pestaña principal:', error);
+                tabContent.innerHTML = '<p>Error al cargar la configuración principal.</p>';
+            });
+    
+        experimentTabsContent.appendChild(tabContent);
+    }
+
+
 
     function createExperimentTab(folderName, expId, isActive) {
         const experimentTabs = document.getElementById('experimentTabs');
@@ -122,90 +216,120 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const experimentTabsContent = document.getElementById('experimentTabsContent');
             const tabContent = document.createElement('div');
-            tabContent.className = tab-pane fade ${isActive ? 'show active' : ''};
-            tabContent.id = exp${expId};
+            tabContent.className = `tab-pane fade ${isActive ? 'show active' : ''}`;
+            tabContent.id = `exp${expId}`;
             tabContent.setAttribute('role', 'tabpanel');
-            tabContent.setAttribute('aria-labelledby', exp${expId}-tab);
-
-            const config = await fetchGitHubFile(data/${experimentType}/${folderName}/config.json);
-            const descripcionHTML = 
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <h5>Descripción</h5>
-                        <pre>${Object.entries(config.Descripcion).map(([key, value]) => ${key}: ${value}).join('\n')}</pre>
-                    </div>
-                </div>
-            ;
-            const configuracionHTML = 
+            tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
+    
+            // Eliminar la primera imagen (antes iba aquí)
+    
+            // Subir la sección de videos
+            const videoSectionHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
-                        <h2>Configuración del Entorno</h2>
+                        <h2>Videos del Experimento</h2>
                     </div>
                     <div class="card-body">
-                        ${descripcionHTML}
-                        <div class="row">
-                            <div class="col-12 col-md-6">
-                                <h5>Entrenamiento</h5>
-                                <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => ${key}: ${value}).join('\n')}</pre>
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <h5>Test</h5>
-                                <pre>${Object.entries(config.Test).map(([key, value]) => ${key}: ${value}).join('\n')}</pre>
-                            </div>
+                        <div id="videoList${expId}" class="mb-3"></div>
+                        <div class="ratio ratio-16x9">
+                            <video id="mainVideo${expId}" controls>
+                                <!-- Este video será dinámico -->
+                            </video>
                         </div>
                     </div>
                 </div>
-            ;
-            tabContent.innerHTML = configuracionHTML;
-
-            const imagenEnvHTML = 
-                <div class="card my-4">
-                    <div class="card-body text-center">
-                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/env.png" alt="Imagen de Entorno" class="img-fluid">
-                    </div>
-                </div>
-            ;
-            tabContent.innerHTML += imagenEnvHTML;
-
-            const chartsContainerId = chartsContainer${expId};
-            const chartsContainerHTML = <div id="${chartsContainerId}" class="row my-4"></div>;
-            tabContent.innerHTML += chartsContainerHTML;
-
-            experimentTabsContent.appendChild(tabContent);
-
-            // Agrega el event listener para cargar los gráficos cuando la pestaña se muestre
-            const tabButton = document.querySelector(#exp${expId}-tab);
-            if (tabButton) {
-                tabButton.addEventListener('shown.bs.tab', function(event) {
-                    console.log(Cargando gráficos para: ${folderName});
-                    loadChartData(data/${experimentType}/${folderName}/tensorflow.json, chartsContainerId);
+            `;
+            tabContent.innerHTML += videoSectionHTML;
+    
+            // Cargar videos dinámicamente
+            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
+            const videos = files.filter(file => file.name.endsWith('.mp4'));
+    
+            const videoList = tabContent.querySelector(`#videoList${expId}`);
+            const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
+    
+            if (videos.length > 0) {
+                videos.forEach((video, index) => {
+                    const videoButton = document.createElement('button');
+                    videoButton.className = 'btn btn-outline-primary btn-sm m-1';
+                    videoButton.textContent = video.name;
+                    videoButton.addEventListener('click', () => {
+                        mainVideo.src = `https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}`;
+                        mainVideo.play();
+                    });
+                    videoList.appendChild(videoButton);
+    
+                    // Establecer el primer video como predeterminado
+                    if (index === 0) {
+                        mainVideo.src = `https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}`;
+                    }
                 });
+            } else {
+                videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
-
-            // Si la pestaña es activa, carga los gráficos después de un breve retraso
-            if (isActive) {
-                setTimeout(() => {
-                    console.log(Cargando gráficos para la pestaña activa: ${folderName});
-                    loadChartData(data/${experimentType}/${folderName}/tensorflow.json, chartsContainerId);
-                }, 100); // Retraso de 100ms
-            }
-
-            const imagenHTML = 
+    
+            // Mostrar la segunda imagen (gráfica de resultados)
+            const testResultsHTML = `
                 <div class="card my-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h2>Gráfica resultados del test del modelo aprendido</h2>
+                    <div class="card-header bg-success text-white">
+                        <h2>Gráfica de Resultados</h2>
                     </div>
                     <div class="card-body text-center">
-                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/pie_chart.png" alt="Pie Chart" class="img-fluid">
+                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/pie_chart.png" alt="Gráfica de Resultados" class="img-fluid">
                     </div>
                 </div>
-            ;
-            tabContent.innerHTML += imagenHTML;
-
-            await loadExperimentVideos(folderName, experimentType, expId, tabContent);
+            `;
+            tabContent.innerHTML += testResultsHTML;
+    
+            // Cargar el gráfico interactivo desde plotly_tensorboard.html
+            const plotlyHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2>Training Statistics</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <iframe src="data/${experimentType}/${folderName}/plotly_tensorboard.html" width="100%" height="600" frameborder="0"></iframe>
+                    </div>
+                </div>
+            `;
+            tabContent.innerHTML += plotlyHTML;
+    
+            experimentTabsContent.appendChild(tabContent);
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
+        }
+    }
+
+
+    async function loadPlotlyChart(jsonPath, containerId) {
+        try {
+            const data = await fetchGitHubFile(jsonPath);
+            if (!data) {
+                console.warn(`No se encontraron datos en ${jsonPath}.`);
+                return;
+            }
+    
+            // Crear el contenedor del gráfico
+            const container = document.getElementById(containerId);
+            container.innerHTML = '<div id="plotlyChart" style="width:100%;height:600px;"></div>';
+    
+            // Datos y trazas para el gráfico
+            const traces = Object.keys(data).map(metric => ({
+                x: data[metric].indices,  // Eje X
+                y: data[metric].values,   // Eje Y
+                mode: 'lines',
+                name: metric
+            }));
+    
+            // Renderizar el gráfico con Plotly
+            Plotly.newPlot('plotlyChart', traces, {
+                title: 'Gráfica Interactiva',
+                xaxis: { title: 'Iteración' },
+                yaxis: { title: 'Valores' }
+            });
+        } catch (error) {
+            console.error('Error al cargar el gráfico de Plotly:', error);
         }
     }
 
