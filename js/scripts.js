@@ -255,11 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
             tabContent.id = `exp${expId}`;
             tabContent.setAttribute('role', 'tabpanel');
             tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
-
+    
             // Cargar videos del experimento
             const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
             const videos = files.filter(file => file.name.endsWith('.mp4'));
-
+    
+            // Crear la sección de videos
             const videoSectionHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
@@ -275,30 +276,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
-            tabContent.innerHTML += videoSectionHTML;
-
+            const videoSection = document.createElement('div');
+            videoSection.innerHTML = videoSectionHTML;
+            tabContent.appendChild(videoSection);
+    
             const videoList = tabContent.querySelector(`#videoList${expId}`);
             const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
-
+    
             const baseURL = `https://${githubUsername}.github.io`; // Ajusta si es necesario
-
+    
             if (videos.length > 0) {
                 videos.forEach((video, index) => {
                     let videoSrc = `${baseURL}/data/${experimentType}/${folderName}/${video.name}`;
-
+    
                     let videoButton = document.createElement('button');
                     videoButton.className = 'btn btn-outline-primary btn-sm m-1';
                     videoButton.textContent = video.name;
-
+    
+                    // Agregar el event listener
                     videoButton.addEventListener('click', () => {
                         console.log('Botón de video clicado:', video.name);
                         console.log('Ruta del video:', videoSrc);
                         mainVideo.src = videoSrc;
                         mainVideo.play();
                     });
-
+    
                     videoList.appendChild(videoButton);
-
+    
                     // Establecer el primer video como predeterminado
                     if (index === 0) {
                         mainVideo.src = videoSrc;
@@ -307,8 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
-
-            // Mostrar el gráfico interactivo de entrenamiento
+    
+            // Crear la sección de Training Statistics
             const trainingHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-primary text-white">
@@ -319,14 +323,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
-            tabContent.innerHTML += trainingHTML;
-
+            const trainingSection = document.createElement('div');
+            trainingSection.innerHTML = trainingHTML;
+            tabContent.appendChild(trainingSection);
+    
             experimentTabsContent.appendChild(tabContent);
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
         }
     }
+
 
     loadMainFolders();
 });
