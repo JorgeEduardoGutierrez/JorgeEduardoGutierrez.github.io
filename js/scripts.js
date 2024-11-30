@@ -221,8 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
             tabContent.setAttribute('role', 'tabpanel');
             tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
     
-            // Eliminar la primera imagen (antes iba aquí)
-    
             // Subir la sección de videos
             const videoSectionHTML = `
                 <div class="card my-4">
@@ -233,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div id="videoList${expId}" class="mb-3"></div>
                         <div class="ratio ratio-16x9">
                             <video id="mainVideo${expId}" controls>
-                                <!-- Este video será dinámico -->
+                                <!-- Video dinámico -->
                             </video>
                         </div>
                     </div>
@@ -254,14 +252,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     videoButton.className = 'btn btn-outline-primary btn-sm m-1';
                     videoButton.textContent = video.name;
                     videoButton.addEventListener('click', () => {
-                        mainVideo.src = `https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}`;
+                        mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
                         mainVideo.play();
                     });
                     videoList.appendChild(videoButton);
     
                     // Establecer el primer video como predeterminado
                     if (index === 0) {
-                        mainVideo.src = `https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}`;
+                        mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
                     }
                 });
             } else {
@@ -275,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h2>Gráfica de Resultados</h2>
                     </div>
                     <div class="card-body text-center">
-                        <img src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/pie_chart.png" alt="Gráfica de Resultados" class="img-fluid">
+                        <img src="data/${experimentType}/${folderName}/pie_chart.png" alt="Gráfica de Resultados" class="img-fluid">
                     </div>
                 </div>
             `;
@@ -300,6 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
         }
     }
+
 
 
     async function loadPlotlyChart(jsonPath, containerId) {
