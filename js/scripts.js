@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
         try {
             const response = await fetch(url);
+            if (response.status === 403) {
+                const resetTime = response.headers.get('X-RateLimit-Reset');
+                const remaining = response.headers.get('X-RateLimit-Remaining');
+                console.error(`Límite de tasa alcanzado. Intenta de nuevo después de ${new Date(resetTime * 1000).toLocaleTimeString()}.`);
+                throw new Error('Límite de tasa alcanzado.');
+            }
             if (!response.ok) {
                 throw new Error(`Error al obtener datos de GitHub API: ${response.statusText}`);
             }
@@ -23,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             throw error;
         }
     }
+
 
     async function loadMainFolders() {
         try {
