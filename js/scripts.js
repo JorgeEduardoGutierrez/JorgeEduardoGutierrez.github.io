@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabItem.className = 'nav-item';
         tabItem.innerHTML = `
             <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">
-                Configuración Principal
+                Main
             </button>
         `;
         experimentTabs.appendChild(tabItem);
@@ -168,14 +168,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
     
-                // Agregar el primer gráfico (Training Statistics)
+                // Agregar el primer gráfico (Training Results)
                 const trainingHTML = `
                     <div class="card my-4">
                         <div class="card-header bg-primary text-white">
-                            <h2>Training Statistics</h2>
+                            <h2>Training Results</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/plotly_tensorboard.html" width="100%" height="600" frameborder="0"></iframe>
+                            <iframe src="data/${experimentType}/main/training_results.html" width="100%" height="600" frameborder="0"></iframe>
                         </div>
                     </div>
                 `;
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2>Test Results</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/plotly_results.html" width="100%" height="600" frameborder="0"></iframe>
+                            <iframe src="data/${experimentType}/main/test_results.html" width="100%" height="600" frameborder="0"></iframe>
                         </div>
                     </div>
                 `;
@@ -201,20 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     
         experimentTabsContent.appendChild(tabContent);
-    }
-
-
-
-    function createExperimentTab(folderName, expId, isActive) {
-        const experimentTabs = document.getElementById('experimentTabs');
-        const tabItem = document.createElement('li');
-        tabItem.className = 'nav-item';
-        tabItem.innerHTML = 
-            <button class="nav-link ${isActive ? 'active' : ''}" id="exp${expId}-tab" data-bs-toggle="tab" data-bs-target="#exp${expId}" type="button" role="tab" aria-controls="exp${expId}" aria-selected="${isActive ? 'true' : 'false'}">
-                ${folderName}
-            </button>
-        ;
-        experimentTabs.appendChild(tabItem);
     }
 
     async function createExperimentContent(folderName, experimentType, expId, isActive) {
@@ -271,31 +257,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
     
-            // Mostrar el gráfico interactivo (Pie Chart)
-            const pieChartHTML = `
-                <div class="card my-4">
-                    <div class="card-header bg-success text-white">
-                        <h2>Distribución de Resultados</h2>
-                    </div>
-                    <div class="card-body text-center">
-                        <iframe src="data/${experimentType}/${folderName}/pie_chart.html" width="100%" height="600" frameborder="0"></iframe>
-                    </div>
-                </div>
-            `;
-            tabContent.innerHTML += pieChartHTML;
-    
-            // Cargar el gráfico interactivo de entrenamiento
-            const plotlyHTML = `
+            // Mostrar el gráfico interactivo de entrenamiento
+            const trainingHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-primary text-white">
                         <h2>Training Statistics</h2>
                     </div>
                     <div class="card-body text-center">
-                        <iframe src="data/${experimentType}/${folderName}/plotly_tensorboard.html" width="100%" height="600" frameborder="0"></iframe>
+                        <iframe src="data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
                     </div>
                 </div>
             `;
-            tabContent.innerHTML += plotlyHTML;
+            tabContent.innerHTML += trainingHTML;
     
             experimentTabsContent.appendChild(tabContent);
         } catch (error) {
@@ -303,8 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
         }
     }
-
-
 
 
     async function loadPlotlyChart(jsonPath, containerId) {
@@ -401,19 +372,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.error(No se pudo obtener el contexto para el canvas ${canvasId}.);
                         return;
                     }
-
-                    // const labels = data[metric].map((_, idx) => Punto ${idx + 1});
-                    // const chartData = {
-                    //     labels: labels,
-                    //     datasets: [{
-                    //         label: metric,
-                    //         data: data[metric],
-                    //         borderColor: 'rgb(75, 192, 192)',
-                    //         backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    //         fill: true,
-                    //         tension: 0.1
-                    //     }]
-                    // };
 
                     const indices = data[metric].indices; // Tomar los índices originales
                     const values = data[metric].values;
