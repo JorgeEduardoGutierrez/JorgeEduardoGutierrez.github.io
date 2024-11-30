@@ -48,14 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Resto del código permanece igual...
-
-    function setActiveLink(selectedLink) {
-        const links = document.querySelectorAll('#sidebarMenu .nav-link');
-        links.forEach(link => link.classList.remove('active'));
-        selectedLink.classList.add('active');
-    }
-
     async function loadMainFolders() {
         try {
             showLoading(true);
@@ -72,18 +64,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             mainFolders.forEach(folder => {
                 console.log('Procesando carpeta:', folder.name);
+                const folderName = folder.name;
                 const listItem = document.createElement('li');
                 listItem.className = 'nav-item';
 
                 const link = document.createElement('a');
                 link.href = '#';
                 link.className = 'nav-link';
-                link.textContent = folder.name;
+                link.textContent = folderName;
 
                 link.addEventListener('click', async (e) => {
                     e.preventDefault();
                     setActiveLink(link);
-                    await loadExperimentSet(folder.name);
+                    await loadExperimentSet(folderName);
                 });
 
                 listItem.appendChild(link);
@@ -98,6 +91,54 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error al cargar carpetas principales:', error);
             alert('Hubo un error al cargar las carpetas principales. Por favor, inténtalo de nuevo más tarde.');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function setActiveLink(selectedLink) {
+        const links = document.querySelectorAll('#sidebarMenu .nav-link');
+        links.forEach(link => link.classList.remove('active'));
+        selectedLink.classList.add('active');
+    }
+
+    async function loadExperimentSet(experimentType) {
+        try {
+            showLoading(true);
+            const experimentTabs = document.getElementById('experimentTabs');
+            const experimentTabsContent = document.getElementById('experimentTabsContent');
+            experimentTabs.innerHTML = '';
+            experimentTabsContent.innerHTML = '';
+
+            // Obtener la lista de experimentos dinámicamente
+            const data = await fetchFromGitHubAPI(`data/${experimentType}`);
+            console.log('Datos obtenidos para experimentType:', data);
+
+            const mainFolder = data.find(item => item.type === 'dir' && item.name === 'main');
+            const experimentFolders = data.filter(item => item.type === 'dir' && item.name !== 'main');
+
+            // Cargar contenido de 'main' si existe
+            if (mainFolder) {
+                createMainTab(experimentType);
+            }
+
+            // Cargar otros experimentos
+            experimentFolders.forEach((folder, index) => {
+                const folderName = folder.name;
+                const expId = index + 1;
+                createExperimentTab(folderName, expId);
+                createExperimentContent(folderName, experimentType, expId);
+            });
+
+            // Activar la pestaña Main si existe, o la primera de los experimentos
+            const activeTab = document.querySelector(`#main-tab`) || document.querySelector(`#exp1-tab`);
+            if (activeTab) {
+                const tab = new bootstrap.Tab(activeTab);
+                tab.show();
+            }
+        } catch (error) {
+            console.error('Error al cargar los experimentos:', error);
+            alert('Hubo un error al cargar los experimentos. Por favor, inténtalo de nuevo más tarde.');
         } finally {
             showLoading(false);
         }
@@ -193,38 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         experimentTabsContent.appendChild(tabContent);
     }
 
-    async function loadExperimentSet(experimentType) {
-        try {
-            showLoading(true);
-            const experimentTabs = document.getElementById('experimentTabs');
-            const experimentTabsContent = document.getElementById('experimentTabsContent');
-            experimentTabs.innerHTML = '';
-            experimentTabsContent.innerHTML = '';
-    
-            // Lista de experimentos; puedes cargarla desde un archivo JSON o definirla aquí
-            const experimentFolders = ['experimento1', 'experimento2']; // Ajusta según tus experimentos
-    
-            experimentFolders.forEach((folderName, index) => {
-                const expId = index + 1;
-                createExperimentTab(folderName, expId);
-                createExperimentContent(folderName, experimentType, expId);
-            });
-    
-            // Activar la primera pestaña
-            const firstTab = document.querySelector(`#experimentTabs .nav-link`);
-            if (firstTab) {
-                const tab = new bootstrap.Tab(firstTab);
-                tab.show();
-            }
-        } catch (error) {
-            console.error('Error al cargar los experimentos:', error);
-            alert('Hubo un error al cargar los experimentos. Por favor, inténtalo de nuevo más tarde.');
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    
     function createExperimentTab(folderName, expId) {
         const experimentTabs = document.getElementById('experimentTabs');
 
@@ -238,82 +247,81 @@ document.addEventListener('DOMContentLoaded', () => {
         experimentTabs.appendChild(tabItem);
     }
 
-   async function createExperimentContent(folderName, experimentType, expId) {
-    try {
-        const experimentTabsContent = document.getElementById('experimentTabsContent');
-        const tabContent = document.createElement('div');
-        tabContent.className = 'tab-pane fade';
-        tabContent.id = `exp${expId}`;
-        tabContent.setAttribute('role', 'tabpanel');
-        tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
+    async function createExperimentContent(folderName, experimentType, expId) {
+        try {
+            const experimentTabsContent = document.getElementById('experimentTabsContent');
+            const tabContent = document.createElement('div');
+            tabContent.className = 'tab-pane fade';
+            tabContent.id = `exp${expId}`;
+            tabContent.setAttribute('role', 'tabpanel');
+            tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
 
-        // Cargar videos del experimento
-        const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
-        const videos = files.filter(file => file.name.endsWith('.mp4'));
+            // Cargar videos del experimento
+            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
+            const videos = files.filter(file => file.name.endsWith('.mp4'));
 
-        const videoSectionHTML = `
-            <div class="card my-4">
-                <div class="card-header bg-secondary text-white">
-                    <h2>Videos del Experimento</h2>
-                </div>
-                <div class="card-body">
-                    <div id="videoList${expId}" class="mb-3"></div>
-                    <div class="ratio ratio-16x9">
-                        <video id="mainVideo${expId}" controls>
-                            <!-- Video dinámico -->
-                        </video>
+            const videoSectionHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>Videos del Experimento</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="videoList${expId}" class="mb-3"></div>
+                        <div class="ratio ratio-16x9">
+                            <video id="mainVideo${expId}" controls>
+                                <!-- Video dinámico -->
+                            </video>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-        tabContent.innerHTML += videoSectionHTML;
+            `;
+            tabContent.innerHTML += videoSectionHTML;
 
-        const videoList = tabContent.querySelector(`#videoList${expId}`);
-        const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
+            const videoList = tabContent.querySelector(`#videoList${expId}`);
+            const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
 
-        const baseURL = `https://${githubUsername}.github.io`; // Ajusta si es necesario
+            const baseURL = `https://${githubUsername}.github.io`; // Ajusta si es necesario
 
-        if (videos.length > 0) {
-            videos.forEach((video, index) => {
-                let videoSrc = `${baseURL}/data/${experimentType}/${folderName}/${video.name}`;
+            if (videos.length > 0) {
+                videos.forEach((video, index) => {
+                    let videoSrc = `${baseURL}/data/${experimentType}/${folderName}/${video.name}`;
 
-                let videoButton = document.createElement('button');
-                videoButton.className = 'btn btn-outline-primary btn-sm m-1';
-                videoButton.textContent = video.name;
+                    let videoButton = document.createElement('button');
+                    videoButton.className = 'btn btn-outline-primary btn-sm m-1';
+                    videoButton.textContent = video.name;
 
-                videoButton.addEventListener('click', () => {
-                    console.log('Botón de video clicado:', video.name);
-                    console.log('Ruta del video:', videoSrc);
-                    console.log('Elemento mainVideo:', mainVideo);
-                    mainVideo.src = videoSrc;
-                    mainVideo.play();
+                    videoButton.addEventListener('click', () => {
+                        console.log('Botón de video clicado:', video.name);
+                        console.log('Ruta del video:', videoSrc);
+                        mainVideo.src = videoSrc;
+                        mainVideo.play();
+                    });
+
+                    videoList.appendChild(videoButton);
+
+                    // Establecer el primer video como predeterminado
+                    if (index === 0) {
+                        mainVideo.src = videoSrc;
+                    }
                 });
+            } else {
+                videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
+            }
 
-                videoList.appendChild(videoButton);
-
-                // Establecer el primer video como predeterminado
-                if (index === 0) {
-                    mainVideo.src = videoSrc;
-                }
-            });
-        } else {
-            videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
-        }
-
-        // Mostrar el gráfico interactivo de entrenamiento
-        const trainingHTML = `
-            <div class="card my-4">
-                <div class="card-header bg-primary text-white">
-                    <h2>Training Statistics</h2>
+            // Mostrar el gráfico interactivo de entrenamiento
+            const trainingHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2>Training Statistics</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <iframe src="${baseURL}/data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
+                    </div>
                 </div>
-                <div class="card-body text-center">
-                    <iframe src="${baseURL}/data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
-                </div>
-            </div>
-        `;
-        tabContent.innerHTML += trainingHTML;
+            `;
+            tabContent.innerHTML += trainingHTML;
 
-        experimentTabsContent.appendChild(tabContent);
+            experimentTabsContent.appendChild(tabContent);
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
