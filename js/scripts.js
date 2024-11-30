@@ -48,6 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function setActiveLink(selectedLink) {
+        const links = document.querySelectorAll('#sidebarMenu .nav-link');
+        links.forEach(link => link.classList.remove('active'));
+        selectedLink.classList.add('active');
+    }
+
     async function loadMainFolders() {
         try {
             showLoading(true);
@@ -96,12 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function setActiveLink(selectedLink) {
-        const links = document.querySelectorAll('#sidebarMenu .nav-link');
-        links.forEach(link => link.classList.remove('active'));
-        selectedLink.classList.add('active');
-    }
-
     async function loadExperimentSet(experimentType) {
         try {
             showLoading(true);
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const experimentTabs = document.getElementById('experimentTabs');
         const experimentTabsContent = document.getElementById('experimentTabsContent');
 
-        // Crear la pestaña
+        // Crear la pestaña "Main"
         const tabItem = document.createElement('li');
         tabItem.className = 'nav-item';
         tabItem.innerHTML = `
@@ -158,46 +158,20 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         experimentTabs.appendChild(tabItem);
 
-        // Crear el contenido de la pestaña
+        // Crear el contenido de la pestaña "Main"
         const tabContent = document.createElement('div');
         tabContent.className = 'tab-pane fade';
         tabContent.id = 'main';
         tabContent.setAttribute('role', 'tabpanel');
         tabContent.setAttribute('aria-labelledby', 'main-tab');
 
+        // Cargar y procesar el archivo config.json
         fetchGitHubFile(`data/${experimentType}/main/config.json`)
             .then(config => {
-                // Agregar Descripción, Entrenamiento y Test
-                const descripcionHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h2>Descripción</h2>
-                        </div>
-                        <div class="card-body">
-                            <pre>${Object.entries(config.Descripcion).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                        </div>
-                    </div>
-                `;
-                const entrenamientoHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h2>Entrenamiento</h2>
-                        </div>
-                        <div class="card-body">
-                            <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                        </div>
-                    </div>
-                `;
-                const testHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h2>Test</h2>
-                        </div>
-                        <div class="card-body">
-                            <pre>${Object.entries(config.Test).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                        </div>
-                    </div>
-                `;
+                console.log('config.json cargado para Main:', config);
+                // Crear el HTML a partir del JSON
+                const configHTML = generateConfigHTML(config);
+                tabContent.innerHTML = configHTML;
 
                 // Agregar el gráfico de Training Results
                 const trainingHTML = `
@@ -206,10 +180,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2>Training Results</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/training_results.html" width="100%" height="600" frameborder="0"></iframe>
+                            <iframe src="https://${githubUsername}.github.io/data/${experimentType}/main/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
                         </div>
                     </div>
                 `;
+                const trainingSection = document.createElement('div');
+                trainingSection.innerHTML = trainingHTML;
+                tabContent.appendChild(trainingSection);
 
                 // Agregar el gráfico de Test Results
                 const testResultsHTML = `
@@ -218,13 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2>Test Results</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/test_results.html" width="100%" height="600" frameborder="0"></iframe>
+                            <iframe src="https://${githubUsername}.github.io/data/${experimentType}/main/test_results.html" width="100%" height="600" frameborder="0"></iframe>
                         </div>
                     </div>
                 `;
-
-                // Unir todo el contenido
-                tabContent.innerHTML = descripcionHTML + entrenamientoHTML + testHTML + trainingHTML + testResultsHTML;
+                const testResultsSection = document.createElement('div');
+                testResultsSection.innerHTML = testResultsHTML;
+                tabContent.appendChild(testResultsSection);
             })
             .catch(error => {
                 console.error('Error al cargar el contenido de la pestaña principal:', error);
@@ -255,12 +232,29 @@ document.addEventListener('DOMContentLoaded', () => {
             tabContent.id = `exp${expId}`;
             tabContent.setAttribute('role', 'tabpanel');
             tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
-    
-            // Cargar videos del experimento
-            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
-            const videos = files.filter(file => file.name.endsWith('.mp4'));
-    
-            // Crear la sección de videos
+
+            // **Nueva Funcionalidad: Cargar y Mostrar el JSON del Experimento**
+            const configPath = `data/${experimentType}/${folderName}/config.json`;
+            try {
+                const config = await fetchGitHubFile(configPath);
+                console.log('config.json cargado para el experimento:', folderName, config);
+
+                // Generar HTML a partir del JSON
+                const configHTML = generateConfigHTML(config);
+                const configSection = document.createElement('div');
+                configSection.innerHTML = configHTML;
+                tabContent.appendChild(configSection);
+            } catch (error) {
+                console.error(`Error al cargar config.json para el experimento ${folderName}:`, error);
+                const errorHTML = `<div class="alert alert-danger" role="alert">
+                    Error al cargar la configuración del experimento.
+                </div>`;
+                const errorSection = document.createElement('div');
+                errorSection.innerHTML = errorHTML;
+                tabContent.appendChild(errorSection);
+            }
+
+            // **Sección de Videos**
             const videoSectionHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
@@ -279,20 +273,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const videoSection = document.createElement('div');
             videoSection.innerHTML = videoSectionHTML;
             tabContent.appendChild(videoSection);
-    
+
             const videoList = tabContent.querySelector(`#videoList${expId}`);
             const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
-    
+
             const baseURL = `https://${githubUsername}.github.io`; // Ajusta si es necesario
-    
+
+            // Cargar videos del experimento
+            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
+            const videos = files.filter(file => file.name.endsWith('.mp4'));
+
             if (videos.length > 0) {
                 videos.forEach((video, index) => {
                     let videoSrc = `${baseURL}/data/${experimentType}/${folderName}/${video.name}`;
-    
+
                     let videoButton = document.createElement('button');
                     videoButton.className = 'btn btn-outline-primary btn-sm m-1';
                     videoButton.textContent = video.name;
-    
+
                     // Agregar el event listener
                     videoButton.addEventListener('click', () => {
                         console.log('Botón de video clicado:', video.name);
@@ -300,9 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         mainVideo.src = videoSrc;
                         mainVideo.play();
                     });
-    
+
                     videoList.appendChild(videoButton);
-    
+
                     // Establecer el primer video como predeterminado
                     if (index === 0) {
                         mainVideo.src = videoSrc;
@@ -311,8 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
-    
-            // Crear la sección de Training Statistics
+
+            // **Sección de Training Statistics**
             const trainingHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-primary text-white">
@@ -326,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const trainingSection = document.createElement('div');
             trainingSection.innerHTML = trainingHTML;
             tabContent.appendChild(trainingSection);
-    
+
             experimentTabsContent.appendChild(tabContent);
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
@@ -334,6 +332,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function generateConfigHTML(config) {
+        // Verificar que las secciones existen
+        if (!config.Descripcion || !config.Entrenamiento || !config.Test) {
+            throw new Error('El archivo config.json no contiene las secciones necesarias.');
+        }
+
+        // Función auxiliar para crear tarjetas
+        const createCard = (title, content, headerClass = 'bg-secondary text-white') => `
+            <div class="card my-4">
+                <div class="card-header ${headerClass}">
+                    <h2>${title}</h2>
+                </div>
+                <div class="card-body">
+                    <pre>${formatContent(content)}</pre>
+                </div>
+            </div>
+        `;
+
+        // Función para formatear el contenido del JSON
+        const formatContent = (obj) => {
+            return Object.entries(obj).map(([key, value]) => `${key}: ${value}`).join('\n');
+        };
+
+        // Crear las tarjetas para cada sección
+        const descripcionHTML = createCard('Descripción', config.Descripcion);
+        const entrenamientoHTML = createCard('Entrenamiento', config.Entrenamiento);
+        const testHTML = createCard('Test', config.Test, 'bg-secondary text-white');
+
+        return descripcionHTML + entrenamientoHTML + testHTML;
+    }
 
     loadMainFolders();
 });
