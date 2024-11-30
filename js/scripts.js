@@ -477,54 +477,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
-        try {
-            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
-            const videos = files.filter(file => /^\d+\.mp4$/.test(file.name));
-
-            if (videos.length === 0) return;
-
-            const videoListHTML = videos.map(video => `
-                <a href="#" class="btn btn-outline-primary btn-sm m-1 video-link" data-video-src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}">
-                    ${video.name}
-                </a>
-            `).join('');
-
-            const videosHTML = `
-                <div class="card my-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h2>Videos del Experimento</h2>
-                    </div>
-                    <div class="card-body">
-                        <div id="videoList${expId}" class="mb-3">${videoListHTML}</div>
-                        <div class="ratio ratio-16x9">
-                            <video id="mainVideo${expId}" controls>
-                                <source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${videos[0].name}" type="video/mp4">
-                                Tu navegador no soporta la etiqueta de video.
-                            </video>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            tabContent.innerHTML += videosHTML;
-
-            const videoLinks = tabContent.querySelectorAll(`#videoList${expId} .video-link`);
-            videoLinks.forEach(link => {
-                link.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    const videoSrc = link.getAttribute('data-video-src');
-                    const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
-                    if (mainVideo) {
-                        mainVideo.src = videoSrc;
-                        mainVideo.play();
-                    }
-                });
+    function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
+        fetchFromGitHubAPI(`data/${experimentType}/${folderName}`)
+            .then(files => {
+                const videos = files.filter(file => file.name.endsWith('.mp4'));
+    
+                const videoList = tabContent.querySelector(`#videoList${expId}`);
+                const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
+    
+                if (videos.length > 0) {
+                    videos.forEach((video, index) => {
+                        // Crear el botón para cada video
+                        const videoButton = document.createElement('button');
+                        videoButton.className = 'btn btn-outline-primary btn-sm m-1';
+                        videoButton.textContent = video.name;
+                        videoButton.dataset.videoSrc = `data/${experimentType}/${folderName}/${video.name}`;
+    
+                        videoButton.addEventListener('click', function () {
+                            const videoSrc = this.dataset.videoSrc;
+                            if (mainVideo) {
+                                mainVideo.src = videoSrc;
+                                mainVideo.play();
+                            }
+                        });
+    
+                        videoList.appendChild(videoButton);
+    
+                        // Cargar el primer video por defecto
+                        if (index === 0 && mainVideo) {
+                            mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
+                        }
+                    });
+                } else {
+                    videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar los videos:', error);
             });
-        } catch (error) {
-            console.error('Error al cargar los videos:', error);
-        }
     }
+
 
     loadMainFolders();
 });
