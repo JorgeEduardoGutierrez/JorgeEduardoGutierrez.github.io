@@ -119,4 +119,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const experimentTabsContent = document.getElementById('experimentTabsContent');
             const tabContent = document.createElement('div');
-         
+            tabContent.className = `tab-pane fade ${isActive ? 'show active' : ''}`;
+            tabContent.id = `exp${expId}`;
+            tabContent.setAttribute('role', 'tabpanel');
+            tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
+
+            // Sección de videos
+            const videoSectionHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>Videos del Experimento</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="videoList${expId}" class="mb-3"></div>
+                        <div class="ratio ratio-16x9">
+                            <video id="mainVideo${expId}" controls>
+                                <source src="" type="video/mp4">
+                                Tu navegador no soporta la etiqueta de video.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            `;
+            tabContent.innerHTML += videoSectionHTML;
+
+            // Cargar videos dinámicamente
+            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
+            const videos = files.filter(file => file.name.endsWith('.mp4'));
+
+            const videoList = tabContent.querySelector(`#videoList${expId}`);
+            const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
+
+            if (videos.length > 0) {
+                videos.forEach((video, index) => {
+                    const videoButton = document.createElement('a');
+                    videoButton.href = "#";
+                    videoButton.className = 'btn btn-outline-primary btn-sm m-1 video-link';
+                    videoButton.textContent = video.name;
+                    videoButton.dataset.videoSrc = `${rawBaseURL}/data/${experimentType}/${folderName}/${video.name}`;
+
+                    videoButton.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const videoSrc = videoButton.dataset.videoSrc;
+                        if (mainVideo) {
+                            const sourceElement = mainVideo.querySelector('source');
+                            if (sourceElement) {
+                                sourceElement.src = videoSrc;
+                                mainVideo.load(); // Recargar el video
+                                mainVideo.play(); // Reproducir automáticamente
+                            }
+                        }
+                    });
+
+                    videoList.appendChild(videoButton);
+
+                    // Cargar el primer video como predeterminado
+                    if (index === 0 && mainVideo) {
+                        const sourceElement = mainVideo.querySelector('source');
+                        if (sourceElement) {
+                            sourceElement.src = `${rawBaseURL}/data/${experimentType}/${folderName}/${video.name}`;
+                            mainVideo.load();
+                        }
+                    }
+                });
+            } else {
+                videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
+            }
+
+            // Mostrar el gráfico interactivo (Pie Chart)
+            const pieChartHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-success text-white">
+                        <h2>Distribución de Resultados</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <iframe src="${rawBaseURL}/data/${experimentType}/${folderName}/pie_chart.html" width="100%" height="600" frameborder="0"></iframe>
+                    </div>
+                </div>
+            `;
+            tabContent.innerHTML += pieChartHTML;
+
+            // Cargar el gráfico interactivo de entrenamiento
+            const plotlyHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2>Training Statistics</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <iframe src="${rawBaseURL}/data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
+                    </div>
+                </div>
+            `;
+            tabContent.innerHTML += plotlyHTML;
+
+            experimentTabsContent.appendChild(tabContent);
+        } catch (error) {
+            console.error('Error al cargar el contenido del experimento:', error);
+            alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
+        }
+    }
+
+    // Iniciar la carga de las carpetas principales
+    loadMainFolders();
+});
