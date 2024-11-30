@@ -297,5 +297,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    loadMainFolders().then(r => );
+    loadMainFolders()
 });
