@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
-
+    const githubToken = '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';
+    
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
         if (loadingIndicator) {
@@ -12,7 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchFromGitHubAPI(path) {
         const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `token ${githubToken}`,
+                },
+            });
             if (!response.ok) {
                 throw new Error(`Error de GitHub API: ${response.status} ${response.statusText}`);
             }
