@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tabContent.innerHTML = configHTML;
 
                 // Agregar el gráfico de Training Results
-                const trainingHTML = `
+                const trainingResultsHTML = `
                     <div class="card my-4">
                         <div class="card-header bg-primary text-white">
                             <h2>Training Results</h2>
