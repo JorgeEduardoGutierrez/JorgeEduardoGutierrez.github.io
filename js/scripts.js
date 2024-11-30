@@ -487,23 +487,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
                 if (videos.length > 0) {
                     videos.forEach((video, index) => {
-                        // Crear el botón para cada video
+                        // Crear botón para cada video
                         const videoButton = document.createElement('button');
                         videoButton.className = 'btn btn-outline-primary btn-sm m-1';
                         videoButton.textContent = video.name;
                         videoButton.dataset.videoSrc = `data/${experimentType}/${folderName}/${video.name}`;
     
-                        videoButton.addEventListener('click', function () {
-                            const videoSrc = this.dataset.videoSrc;
+                        videoButton.addEventListener('click', () => {
+                            const videoSrc = videoButton.dataset.videoSrc;
                             if (mainVideo) {
-                                mainVideo.src = videoSrc;
-                                mainVideo.play();
+                                mainVideo.src = videoSrc; // Cambiar la fuente del video
+                                mainVideo.play(); // Reproducir el video automáticamente
                             }
                         });
     
                         videoList.appendChild(videoButton);
     
-                        // Cargar el primer video por defecto
+                        // Cargar el primer video como predeterminado
                         if (index === 0 && mainVideo) {
                             mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
                         }
@@ -516,6 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error al cargar los videos:', error);
             });
     }
+
 
 
     loadMainFolders();
