@@ -193,6 +193,38 @@ document.addEventListener('DOMContentLoaded', () => {
         experimentTabsContent.appendChild(tabContent);
     }
 
+    async function loadExperimentSet(experimentType) {
+        try {
+            showLoading(true);
+            const experimentTabs = document.getElementById('experimentTabs');
+            const experimentTabsContent = document.getElementById('experimentTabsContent');
+            experimentTabs.innerHTML = '';
+            experimentTabsContent.innerHTML = '';
+    
+            // Lista de experimentos; puedes cargarla desde un archivo JSON o definirla aquí
+            const experimentFolders = ['experimento1', 'experimento2']; // Ajusta según tus experimentos
+    
+            experimentFolders.forEach((folderName, index) => {
+                const expId = index + 1;
+                createExperimentTab(folderName, expId);
+                createExperimentContent(folderName, experimentType, expId);
+            });
+    
+            // Activar la primera pestaña
+            const firstTab = document.querySelector(`#experimentTabs .nav-link`);
+            if (firstTab) {
+                const tab = new bootstrap.Tab(firstTab);
+                tab.show();
+            }
+        } catch (error) {
+            console.error('Error al cargar los experimentos:', error);
+            alert('Hubo un error al cargar los experimentos. Por favor, inténtalo de nuevo más tarde.');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    
     function createExperimentTab(folderName, expId) {
         const experimentTabs = document.getElementById('experimentTabs');
 
