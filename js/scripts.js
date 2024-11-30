@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // TODO: Proporciona tu token de GitHub de forma segura
     // Es recomendable no incluir el token directamente en el código fuente
     // Puedes obtener el token de un archivo de configuración seguro o variable de entorno
-    const githubToken = 'TU_TOKEN_DE_GITHUB_AQUÍ';
+    const githubToken = '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';
 
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
