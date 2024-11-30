@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
     const githubToken = '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';
-    
+
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
         if (loadingIndicator) {
@@ -24,6 +24,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return await response.json();
         } catch (error) {
             console.error('Error al realizar la solicitud a la API de GitHub:', error);
+            throw error;
+        }
+    }
+
+    async function fetchGitHubFile(path) {
+        const url = 'https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}';
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data && data.content) {
+                const decodedContent = atob(data.content.replace(/\s/g, '')); // Eliminar espacios en blanco
+                return JSON.parse(decodedContent);
+            }
+            throw new Error('Contenido vacío o formato incorrecto');
+        } catch (error) {
+            console.error('Error al cargar el archivo JSON:', error);
             throw error;
         }
     }
@@ -81,16 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const experimentTabsContent = document.getElementById('experimentTabsContent');
             experimentTabs.innerHTML = '';
             experimentTabsContent.innerHTML = '';
-    
+
             const data = await fetchFromGitHubAPI(`data/${experimentType}`);
             const mainFolder = data.find(item => item.type === 'dir' && item.name === 'main');
             const experimentFolders = data.filter(item => item.type === 'dir' && item.name !== 'main');
-    
+
             // Cargar contenido de 'main' si existe
             if (mainFolder) {
                 createMainTab(experimentType);
             }
-    
+
             // Cargar otros experimentos
             experimentFolders.forEach((folder, index) => {
                 const expId = index + 1;
@@ -98,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 createExperimentTab(folder.name, expId, isActive);
                 createExperimentContent(folder.name, experimentType, expId, isActive);
             });
-    
+
             // Activar la pestaña Main si existe, o la primera de los experimentos
             if (document.querySelector(`#main-tab`)) {
                 const mainTab = document.querySelector(`#main-tab`);
@@ -117,11 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     function createMainTab(experimentType) {
         const experimentTabs = document.getElementById('experimentTabs');
         const experimentTabsContent = document.getElementById('experimentTabsContent');
-    
+
         // Crear la pestaña
         const tabItem = document.createElement('li');
         tabItem.className = 'nav-item';
@@ -131,14 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
             </button>
         `;
         experimentTabs.appendChild(tabItem);
-    
+
         // Crear el contenido de la pestaña
         const tabContent = document.createElement('div');
         tabContent.className = 'tab-pane fade show active';
         tabContent.id = 'main';
         tabContent.setAttribute('role', 'tabpanel');
         tabContent.setAttribute('aria-labelledby', 'main-tab');
-    
+
         fetchGitHubFile(`data/${experimentType}/main/config.json`)
             .then(config => {
                 // Agregar Descripción, Entrenamiento y Test
@@ -172,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
-    
+
                 // Agregar el primer gráfico (Training Results)
                 const trainingHTML = `
                     <div class="card my-4">
@@ -184,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
-    
+
                 // Agregar el segundo gráfico (Test Results)
                 const testResultsHTML = `
                     <div class="card my-4">
@@ -196,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `;
-    
+
                 // Unir todo el contenido
                 tabContent.innerHTML = descripcionHTML + entrenamientoHTML + testHTML + trainingHTML + testResultsHTML;
             })
@@ -204,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error al cargar el contenido de la pestaña principal:', error);
                 tabContent.innerHTML = '<p>Error al cargar la configuración principal.</p>';
             });
-    
+
         experimentTabsContent.appendChild(tabContent);
     }
 
@@ -216,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tabContent.id = `exp${expId}`;
             tabContent.setAttribute('role', 'tabpanel');
             tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
-    
+
             // Subir la sección de videos
             const videoSectionHTML = `
                 <div class="card my-4">
@@ -234,14 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             tabContent.innerHTML += videoSectionHTML;
-    
+
             // Cargar videos dinámicamente
             const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
             const videos = files.filter(file => file.name.endsWith('.mp4'));
-    
+
             const videoList = tabContent.querySelector(`#videoList${expId}`);
             const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
-    
+
             if (videos.length > 0) {
                 videos.forEach((video, index) => {
                     const videoButton = document.createElement('button');
@@ -252,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         mainVideo.play();
                     });
                     videoList.appendChild(videoButton);
-    
+
                     // Establecer el primer video como predeterminado
                     if (index === 0) {
                         mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
@@ -261,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
-    
+
             // Mostrar el gráfico interactivo de entrenamiento
             const trainingHTML = `
                 <div class="card my-4">
@@ -274,218 +289,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             tabContent.innerHTML += trainingHTML;
-    
+
             experimentTabsContent.appendChild(tabContent);
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
         }
     }
-
-
-    async function loadPlotlyChart(jsonPath, containerId) {
-        try {
-            const data = await fetchGitHubFile(jsonPath);
-            if (!data) {
-                console.warn(`No se encontraron datos en ${jsonPath}.`);
-                return;
-            }
     
-            // Crear el contenedor del gráfico
-            const container = document.getElementById(containerId);
-            container.innerHTML = '<div id="plotlyChart" style="width:100%;height:600px;"></div>';
-    
-            // Datos y trazas para el gráfico
-            const traces = Object.keys(data).map(metric => ({
-                x: data[metric].indices,  // Eje X
-                y: data[metric].values,   // Eje Y
-                mode: 'lines',
-                name: metric
-            }));
-    
-            // Renderizar el gráfico con Plotly
-            Plotly.newPlot('plotlyChart', traces, {
-                title: 'Gráfica Interactiva',
-                xaxis: { title: 'Iteración' },
-                yaxis: { title: 'Valores' }
-            });
-        } catch (error) {
-            console.error('Error al cargar el gráfico de Plotly:', error);
-        }
-    }
-
-    async function fetchGitHubFile(path) {
-        const url = 'https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}';
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data && data.content) {
-                const decodedContent = atob(data.content.replace(/\s/g, '')); // Eliminar espacios en blanco
-                return JSON.parse(decodedContent);
-            }
-            throw new Error('Contenido vacío o formato incorrecto');
-        } catch (error) {
-            console.error('Error al cargar el archivo JSON:', error);
-            throw error;
-        }
-    }
-
-    async function loadChartData(jsonPath, containerId) {
-        try {
-            const container = document.getElementById(containerId);
-            if (!container) {
-                console.error(Contenedor con ID ${containerId} no encontrado en el DOM.);
-                return;
-            }
-
-            // Limpia el contenedor
-            container.innerHTML = '';
-
-            // Carga los datos del archivo JSON
-            const data = await fetchGitHubFile(jsonPath);
-            if (!data || Object.keys(data).length === 0) {
-                console.warn(No se encontraron datos en ${jsonPath}.);
-                container.innerHTML = '<p>No hay datos disponibles para mostrar los gráficos.</p>';
-                return;
-            }
-
-            // Crea los gráficos para cada métrica
-            const metrics = Object.keys(data);
-
-            metrics.forEach((metric, index) => {
-                const canvasId = chartCanvas${containerId}_${index};
-                
-                // Crear la columna para el gráfico
-                const colDiv = document.createElement('div');
-                colDiv.className = 'col-md-6 mb-4 custom-chart-col'; // Usar clase personalizada
-
-                // Crear el contenedor del gráfico
-                const chartContainer = document.createElement('div');
-                chartContainer.className = 'chart-container';
-
-                // Crear el canvas
-                const canvas = document.createElement('canvas');
-                canvas.id = canvasId;
-                chartContainer.appendChild(canvas);
-                colDiv.appendChild(chartContainer);
-                container.appendChild(colDiv);
-
-                // Inicializar el gráfico después de asegurarse de que el canvas esté visible
-                setTimeout(() => {
-                    const ctx = canvas.getContext('2d');
-                    if (!ctx) {
-                        console.error(No se pudo obtener el contexto para el canvas ${canvasId}.);
-                        return;
-                    }
-
-                    const indices = data[metric].indices; // Tomar los índices originales
-                    const values = data[metric].values;
-    
-                    const chartData = {
-                        labels: indices,
-                        datasets: [{
-                            label: metric,
-                            data: values,
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            fill: true,
-                            tension: 0.1
-                        }]
-                    };
-
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: chartData,
-                        options: { 
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                title: {
-                                    display: true,
-                                    text: Evolución de ${metric}
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Iteración'
-                                    }
-                                },
-                                y: {
-                                    title: {
-                                        display: true,
-                                        text: metric
-                                    },
-                                    beginAtZero: true
-                                }
-                            }
-                        }
-                    });
-
-                    console.log(Gráfico creado: ${canvasId});
-                }, 100); // Retraso de 100ms para asegurar que el canvas esté visible
-            });
-        } catch (error) {
-            console.error('Error en loadChartData:', error);
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.innerHTML = '<p>Error al cargar los datos del gráfico.</p>';
-            }
-        }
-    }
-
-    async function loadExperimentVideos(folderName, experimentType, expId, tabContent) {
-        try {
-            const files = await fetchFromGitHubAPI(data/${experimentType}/${folderName});
-            const videos = files.filter(file => /^\d+\.mp4$/.test(file.name));
-
-            if (videos.length === 0) return;
-
-            const videoListHTML = videos.map(video => 
-                <a href="#" class="btn btn-outline-primary btn-sm m-1 video-link" data-video-src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${video.name}">
-                    ${video.name}
-                </a>
-            ).join('');
-
-            const videosHTML = '
-                <div class="card my-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h2>Videos del Experimento</h2>
-                    </div>
-                    <div class="card-body">
-                        <div id="videoList${expId}" class="mb-3">${videoListHTML}</div>
-                        <div class="ratio ratio-16x9">
-                            <video id="mainVideo${expId}" controls>
-                                <source src="https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main/data/${experimentType}/${folderName}/${videos[0].name}" type="video/mp4">
-                                Tu navegador no soporta la etiqueta de video.
-                            </video>
-                        </div>
-                    </div>
-                </div>'
-            ;
-
-            tabContent.innerHTML += videosHTML;
-
-            const videoLinks = tabContent.querySelectorAll(#videoList${expId} .video-link);
-            videoLinks.forEach(link => {
-                link.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    const videoSrc = link.getAttribute('data-video-src');
-                    const mainVideo = tabContent.querySelector(#mainVideo${expId});
-                    if (mainVideo) {
-                        mainVideo.src = videoSrc;
-                        mainVideo.play();
-                    }
-                });
-            });
-        } catch (error) {
-            console.error('Error al cargar los videos:', error);
-        }
-    }
-
-    loadMainFolders();
+    loadMainFolders().then(r => );
 });
