@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
-    const githubToken = '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';
+    const githubToken = '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';
 
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
