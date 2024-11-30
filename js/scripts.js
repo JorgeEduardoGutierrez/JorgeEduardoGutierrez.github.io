@@ -305,20 +305,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
     
-            // Mostrar la segunda imagen (gráfica de resultados)
-            const testResultsHTML = `
+            // Mostrar el gráfico interactivo (Pie Chart)
+            const pieChartHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-success text-white">
-                        <h2>Gráfica de Resultados</h2>
+                        <h2>Distribución de Resultados</h2>
                     </div>
                     <div class="card-body text-center">
-                        <img src="data/${experimentType}/${folderName}/pie_chart.png" alt="Gráfica de Resultados" class="img-fluid">
+                        <iframe src="data/${experimentType}/${folderName}/pie_chart.html" width="100%" height="600" frameborder="0"></iframe>
                     </div>
                 </div>
             `;
-            tabContent.innerHTML += testResultsHTML;
+            tabContent.innerHTML += pieChartHTML;
     
-            // Cargar el gráfico interactivo desde plotly_tensorboard.html
+            // Cargar el gráfico interactivo de entrenamiento
             const plotlyHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-primary text-white">
