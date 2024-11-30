@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const githubUsername = 'JorgeEduardoGutierrez';
-    const repositoryName = 'JorgeEduardoGutierrez.github.io';
-    const githubToken = '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';
 
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
@@ -10,34 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function fetchFromGitHubAPI(path) {
-        const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
+    async function fetchLocalJSON(path) {
         try {
-            const response = await fetch(url, {
-                headers: {
-                    Authorization: `token ${githubToken}`,
-                },
-            });
+            const response = await fetch(path);
             if (!response.ok) {
-                throw new Error(`Error de GitHub API: ${response.status} ${response.statusText}`);
+                throw new Error(`Error al obtener el archivo: ${response.status} ${response.statusText}`);
             }
             return await response.json();
-        } catch (error) {
-            console.error('Error al realizar la solicitud a la API de GitHub:', error);
-            throw error;
-        }
-    }
-
-    async function fetchGitHubFile(path) {
-        const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data && data.content) {
-                const decodedContent = atob(data.content.replace(/\s/g, '')); // Eliminar espacios en blanco
-                return JSON.parse(decodedContent);
-            }
-            throw new Error('Contenido vacío o formato incorrecto');
         } catch (error) {
             console.error('Error al cargar el archivo JSON:', error);
             throw error;
@@ -47,12 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadMainFolders() {
         try {
             showLoading(true);
-            const folders = await fetchFromGitHubAPI('data');
+            const data = await fetchLocalJSON('data/folders.json');
+            const folders = data.folders;
             const sidebarMenu = document.getElementById('sidebarMenu');
             sidebarMenu.innerHTML = '';
 
-            const mainFolders = folders.filter(folder => folder.type === 'dir');
-            mainFolders.forEach(folder => {
+            folders.forEach(folder => {
                 const listItem = document.createElement('li');
                 listItem.className = 'nav-item';
 
@@ -71,10 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebarMenu.appendChild(listItem);
             });
 
-            if (mainFolders.length > 0) {
+            if (folders.length > 0) {
                 const firstLink = document.querySelector('#sidebarMenu .nav-link');
                 setActiveLink(firstLink);
-                await loadExperimentSet(mainFolders[0].name);
+                await loadExperimentSet(folders[0].name);
             }
         } catch (error) {
             console.error('Error al cargar carpetas principales:', error);
@@ -98,31 +74,23 @@ document.addEventListener('DOMContentLoaded', () => {
             experimentTabs.innerHTML = '';
             experimentTabsContent.innerHTML = '';
 
-            const data = await fetchFromGitHubAPI(`data/${experimentType}`);
-            const mainFolder = data.find(item => item.type === 'dir' && item.name === 'main');
-            const experimentFolders = data.filter(item => item.type === 'dir' && item.name !== 'main');
+            const data = await fetchLocalJSON(`data/${experimentType}/experiments.json`);
+            const mainExists = data.includes('main');
+            const experimentFolders = data.filter(folder => folder !== 'main');
 
-            // Cargar contenido de 'main' si existe
-            if (mainFolder) {
+            if (mainExists) {
                 createMainTab(experimentType);
             }
 
-            // Cargar otros experimentos
-            experimentFolders.forEach((folder, index) => {
+            experimentFolders.forEach((folderName, index) => {
                 const expId = index + 1;
-                const isActive = false; // No activar aquí, lo haremos después
-                createExperimentTab(folder.name, expId, isActive);
-                createExperimentContent(folder.name, experimentType, expId, isActive);
+                createExperimentTab(folderName, expId);
+                createExperimentContent(folderName, experimentType, expId);
             });
 
-            // Activar la pestaña Main si existe, o la primera de los experimentos
-            if (document.querySelector(`#main-tab`)) {
-                const mainTab = document.querySelector(`#main-tab`);
-                const tab = new bootstrap.Tab(mainTab);
-                tab.show();
-            } else if (document.querySelector(`#exp1-tab`)) {
-                const firstTabButton = document.querySelector(`#exp1-tab`);
-                const tab = new bootstrap.Tab(firstTabButton);
+            const firstTab = document.querySelector(`#experimentTabs .nav-link`);
+            if (firstTab) {
+                const tab = new bootstrap.Tab(firstTab);
                 tab.show();
             }
         } catch (error) {
@@ -137,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const experimentTabs = document.getElementById('experimentTabs');
         const experimentTabsContent = document.getElementById('experimentTabsContent');
 
-        // Crear la pestaña
         const tabItem = document.createElement('li');
         tabItem.className = 'nav-item';
         tabItem.innerHTML = `
@@ -147,73 +114,16 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         experimentTabs.appendChild(tabItem);
 
-        // Crear el contenido de la pestaña
         const tabContent = document.createElement('div');
         tabContent.className = 'tab-pane fade show active';
         tabContent.id = 'main';
         tabContent.setAttribute('role', 'tabpanel');
         tabContent.setAttribute('aria-labelledby', 'main-tab');
 
-        fetchGitHubFile(`data/${experimentType}/main/config.json`)
+        fetchLocalJSON(`data/${experimentType}/main/config.json`)
             .then(config => {
-                // Agregar Descripción, Entrenamiento y Test
-                const descripcionHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h2>Descripción</h2>
-                        </div>
-                        <div class="card-body">
-                            <pre>${Object.entries(config.Descripcion).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                        </div>
-                    </div>
-                `;
-                const entrenamientoHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h2>Entrenamiento</h2>
-                        </div>
-                        <div class="card-body">
-                            <pre>${Object.entries(config.Entrenamiento).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                        </div>
-                    </div>
-                `;
-                const testHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-secondary text-white">
-                            <h2>Test</h2>
-                        </div>
-                        <div class="card-body">
-                            <pre>${Object.entries(config.Test).map(([key, value]) => `${key}: ${value}`).join('\n')}</pre>
-                        </div>
-                    </div>
-                `;
-
-                // Agregar el primer gráfico (Training Results)
-                const trainingHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-primary text-white">
-                            <h2>Training Results</h2>
-                        </div>
-                        <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/training_results.html" width="100%" height="600" frameborder="0"></iframe>
-                        </div>
-                    </div>
-                `;
-
-                // Agregar el segundo gráfico (Test Results)
-                const testResultsHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-success text-white">
-                            <h2>Test Results</h2>
-                        </div>
-                        <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/test_results.html" width="100%" height="600" frameborder="0"></iframe>
-                        </div>
-                    </div>
-                `;
-
-                // Unir todo el contenido
-                tabContent.innerHTML = descripcionHTML + entrenamientoHTML + testHTML + trainingHTML + testResultsHTML;
+                // Procesa y muestra la configuración
+                // ...
             })
             .catch(error => {
                 console.error('Error al cargar el contenido de la pestaña principal:', error);
@@ -223,79 +133,32 @@ document.addEventListener('DOMContentLoaded', () => {
         experimentTabsContent.appendChild(tabContent);
     }
 
-    async function createExperimentContent(folderName, experimentType, expId, isActive) {
-        try {
-            const experimentTabsContent = document.getElementById('experimentTabsContent');
-            const tabContent = document.createElement('div');
-            tabContent.className = `tab-pane fade ${isActive ? 'show active' : ''}`;
-            tabContent.id = `exp${expId}`;
-            tabContent.setAttribute('role', 'tabpanel');
-            tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
+    function createExperimentTab(folderName, expId) {
+        const experimentTabs = document.getElementById('experimentTabs');
 
-            // Subir la sección de videos
-            const videoSectionHTML = `
-                <div class="card my-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h2>Videos del Experimento</h2>
-                    </div>
-                    <div class="card-body">
-                        <div id="videoList${expId}" class="mb-3"></div>
-                        <div class="ratio ratio-16x9">
-                            <video id="mainVideo${expId}" controls>
-                                <!-- Video dinámico -->
-                            </video>
-                        </div>
-                    </div>
-                </div>
-            `;
-            tabContent.innerHTML += videoSectionHTML;
-
-            // Cargar videos dinámicamente
-            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
-            const videos = files.filter(file => file.name.endsWith('.mp4'));
-
-            const videoList = tabContent.querySelector(`#videoList${expId}`);
-            const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
-
-            if (videos.length > 0) {
-                videos.forEach((video, index) => {
-                    const videoButton = document.createElement('button');
-                    videoButton.className = 'btn btn-outline-primary btn-sm m-1';
-                    videoButton.textContent = video.name;
-                    videoButton.addEventListener('click', () => {
-                        mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
-                        mainVideo.play();
-                    });
-                    videoList.appendChild(videoButton);
-
-                    // Establecer el primer video como predeterminado
-                    if (index === 0) {
-                        mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
-                    }
-                });
-            } else {
-                videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
-            }
-
-            // Mostrar el gráfico interactivo de entrenamiento
-            const trainingHTML = `
-                <div class="card my-4">
-                    <div class="card-header bg-primary text-white">
-                        <h2>Training Statistics</h2>
-                    </div>
-                    <div class="card-body text-center">
-                        <iframe src="data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
-                    </div>
-                </div>
-            `;
-            tabContent.innerHTML += trainingHTML;
-
-            experimentTabsContent.appendChild(tabContent);
-        } catch (error) {
-            console.error('Error al cargar el contenido del experimento:', error);
-            alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
-        }
+        const tabItem = document.createElement('li');
+        tabItem.className = 'nav-item';
+        tabItem.innerHTML = `
+            <button class="nav-link" id="exp${expId}-tab" data-bs-toggle="tab" data-bs-target="#exp${expId}" type="button" role="tab" aria-controls="exp${expId}" aria-selected="false">
+                ${folderName}
+            </button>
+        `;
+        experimentTabs.appendChild(tabItem);
     }
-    
-    loadMainFolders()
+
+    function createExperimentContent(folderName, experimentType, expId) {
+        const experimentTabsContent = document.getElementById('experimentTabsContent');
+        const tabContent = document.createElement('div');
+        tabContent.className = 'tab-pane fade';
+        tabContent.id = `exp${expId}`;
+        tabContent.setAttribute('role', 'tabpanel');
+        tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
+
+        // Carga y muestra el contenido del experimento
+        // ...
+
+        experimentTabsContent.appendChild(tabContent);
+    }
+
+    loadMainFolders();
 });
