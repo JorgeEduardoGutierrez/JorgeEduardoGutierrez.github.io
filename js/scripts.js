@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tabContent.setAttribute('role', 'tabpanel');
             tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
     
-            // Subir la sección de videos
+            // Sección de videos
             const videoSectionHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-secondary text-white">
@@ -270,7 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div id="videoList${expId}" class="mb-3"></div>
                         <div class="ratio ratio-16x9">
                             <video id="mainVideo${expId}" controls>
-                                <!-- Video dinámico -->
+                                <source src="" type="video/mp4">
+                                Tu navegador no soporta la etiqueta de video.
                             </video>
                         </div>
                     </div>
@@ -287,17 +288,25 @@ document.addEventListener('DOMContentLoaded', () => {
     
             if (videos.length > 0) {
                 videos.forEach((video, index) => {
-                    const videoButton = document.createElement('button');
-                    videoButton.className = 'btn btn-outline-primary btn-sm m-1';
+                    const videoButton = document.createElement('a');
+                    videoButton.href = "#";
+                    videoButton.className = 'btn btn-outline-primary btn-sm m-1 video-link';
                     videoButton.textContent = video.name;
-                    videoButton.addEventListener('click', () => {
-                        mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
-                        mainVideo.play();
+                    videoButton.dataset.videoSrc = `data/${experimentType}/${folderName}/${video.name}`;
+    
+                    videoButton.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const videoSrc = videoButton.dataset.videoSrc;
+                        if (mainVideo) {
+                            mainVideo.src = videoSrc; // Cambiar la fuente del video
+                            mainVideo.play(); // Reproducir automáticamente
+                        }
                     });
+    
                     videoList.appendChild(videoButton);
     
-                    // Establecer el primer video como predeterminado
-                    if (index === 0) {
+                    // Cargar el primer video como predeterminado
+                    if (index === 0 && mainVideo) {
                         mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
                     }
                 });
