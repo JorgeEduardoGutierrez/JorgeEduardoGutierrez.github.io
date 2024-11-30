@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchGitHubFile(path) {
-        const url = https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path};
+        const url = 'https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}';
         try {
             const response = await fetch(url);
             const data = await response.json();
