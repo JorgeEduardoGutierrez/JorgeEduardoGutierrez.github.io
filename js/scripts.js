@@ -255,73 +255,82 @@ document.addEventListener('DOMContentLoaded', () => {
         experimentTabs.appendChild(tabItem);
     }
 
-    async function createExperimentContent(folderName, experimentType, expId) {
-        try {
-            const experimentTabsContent = document.getElementById('experimentTabsContent');
-            const tabContent = document.createElement('div');
-            tabContent.className = 'tab-pane fade';
-            tabContent.id = `exp${expId}`;
-            tabContent.setAttribute('role', 'tabpanel');
-            tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
+   async function createExperimentContent(folderName, experimentType, expId) {
+    try {
+        const experimentTabsContent = document.getElementById('experimentTabsContent');
+        const tabContent = document.createElement('div');
+        tabContent.className = 'tab-pane fade';
+        tabContent.id = `exp${expId}`;
+        tabContent.setAttribute('role', 'tabpanel');
+        tabContent.setAttribute('aria-labelledby', `exp${expId}-tab`);
 
-            // Cargar videos del experimento
-            const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
-            const videos = files.filter(file => file.name.endsWith('.mp4'));
+        // Cargar videos del experimento
+        const files = await fetchFromGitHubAPI(`data/${experimentType}/${folderName}`);
+        const videos = files.filter(file => file.name.endsWith('.mp4'));
 
-            const videoSectionHTML = `
-                <div class="card my-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h2>Videos del Experimento</h2>
-                    </div>
-                    <div class="card-body">
-                        <div id="videoList${expId}" class="mb-3"></div>
-                        <div class="ratio ratio-16x9">
-                            <video id="mainVideo${expId}" controls>
-                                <!-- Video dinámico -->
-                            </video>
-                        </div>
+        const videoSectionHTML = `
+            <div class="card my-4">
+                <div class="card-header bg-secondary text-white">
+                    <h2>Videos del Experimento</h2>
+                </div>
+                <div class="card-body">
+                    <div id="videoList${expId}" class="mb-3"></div>
+                    <div class="ratio ratio-16x9">
+                        <video id="mainVideo${expId}" controls>
+                            <!-- Video dinámico -->
+                        </video>
                     </div>
                 </div>
-            `;
-            tabContent.innerHTML += videoSectionHTML;
+            </div>
+        `;
+        tabContent.innerHTML += videoSectionHTML;
 
-            const videoList = tabContent.querySelector(`#videoList${expId}`);
-            const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
+        const videoList = tabContent.querySelector(`#videoList${expId}`);
+        const mainVideo = tabContent.querySelector(`#mainVideo${expId}`);
 
-            if (videos.length > 0) {
-                videos.forEach((video, index) => {
-                    const videoButton = document.createElement('button');
-                    videoButton.className = 'btn btn-outline-primary btn-sm m-1';
-                    videoButton.textContent = video.name;
-                    videoButton.addEventListener('click', () => {
-                        mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
-                        mainVideo.play();
-                    });
-                    videoList.appendChild(videoButton);
+        const baseURL = `https://${githubUsername}.github.io`; // Ajusta si es necesario
 
-                    // Establecer el primer video como predeterminado
-                    if (index === 0) {
-                        mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
-                    }
+        if (videos.length > 0) {
+            videos.forEach((video, index) => {
+                let videoSrc = `${baseURL}/data/${experimentType}/${folderName}/${video.name}`;
+
+                let videoButton = document.createElement('button');
+                videoButton.className = 'btn btn-outline-primary btn-sm m-1';
+                videoButton.textContent = video.name;
+
+                videoButton.addEventListener('click', () => {
+                    console.log('Botón de video clicado:', video.name);
+                    console.log('Ruta del video:', videoSrc);
+                    console.log('Elemento mainVideo:', mainVideo);
+                    mainVideo.src = videoSrc;
+                    mainVideo.play();
                 });
-            } else {
-                videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
-            }
 
-            // Mostrar el gráfico interactivo de entrenamiento
-            const trainingHTML = `
-                <div class="card my-4">
-                    <div class="card-header bg-primary text-white">
-                        <h2>Training Statistics</h2>
-                    </div>
-                    <div class="card-body text-center">
-                        <iframe src="data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
-                    </div>
+                videoList.appendChild(videoButton);
+
+                // Establecer el primer video como predeterminado
+                if (index === 0) {
+                    mainVideo.src = videoSrc;
+                }
+            });
+        } else {
+            videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
+        }
+
+        // Mostrar el gráfico interactivo de entrenamiento
+        const trainingHTML = `
+            <div class="card my-4">
+                <div class="card-header bg-primary text-white">
+                    <h2>Training Statistics</h2>
                 </div>
-            `;
-            tabContent.innerHTML += trainingHTML;
+                <div class="card-body text-center">
+                    <iframe src="${baseURL}/data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
+                </div>
+            </div>
+        `;
+        tabContent.innerHTML += trainingHTML;
 
-            experimentTabsContent.appendChild(tabContent);
+        experimentTabsContent.appendChild(tabContent);
         } catch (error) {
             console.error('Error al cargar el contenido del experimento:', error);
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
