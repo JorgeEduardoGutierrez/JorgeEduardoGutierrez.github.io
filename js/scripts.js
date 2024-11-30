@@ -14,11 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(`Error de GitHub API: ${response.status} ${response.statusText}`);
+                throw new Error(`Error al obtener datos de GitHub API: ${response.statusText}`);
             }
-            return await response.json();
+            const data = await response.json();
+            return data;
         } catch (error) {
-            console.error('Error al realizar la solicitud a la API de GitHub:', error);
+            console.error('Error en fetchFromGitHubAPI:', error);
             throw error;
         }
     }
@@ -253,6 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function createExperimentContent(folderName, experimentType, expId, isActive) {
         try {
+            const rawBaseURL = `https://raw.githubusercontent.com/${githubUsername}/${repositoryName}/main`;
+
             const experimentTabsContent = document.getElementById('experimentTabsContent');
             const tabContent = document.createElement('div');
             tabContent.className = `tab-pane fade ${isActive ? 'show active' : ''}`;
@@ -292,14 +295,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     videoButton.href = "#";
                     videoButton.className = 'btn btn-outline-primary btn-sm m-1 video-link';
                     videoButton.textContent = video.name;
-                    videoButton.dataset.videoSrc = `data/${experimentType}/${folderName}/${video.name}`;
+                    videoButton.dataset.videoSrc = `${rawBaseURL}/data/${experimentType}/${folderName}/${video.name}`;
     
                     videoButton.addEventListener('click', (event) => {
                         event.preventDefault();
                         const videoSrc = videoButton.dataset.videoSrc;
                         if (mainVideo) {
-                            mainVideo.src = videoSrc; // Cambiar la fuente del video
-                            mainVideo.play(); // Reproducir automáticamente
+                            const sourceElement = mainVideo.querySelector('source');
+                            if (sourceElement) {
+                                sourceElement.src = videoSrc;
+                                mainVideo.load(); // Recargar el video
+                                mainVideo.play(); // Reproducir automáticamente
+                            }
                         }
                     });
     
@@ -307,7 +314,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
                     // Cargar el primer video como predeterminado
                     if (index === 0 && mainVideo) {
-                        mainVideo.src = `data/${experimentType}/${folderName}/${video.name}`;
+                        const sourceElement = mainVideo.querySelector('source');
+                        if (sourceElement) {
+                            sourceElement.src = `${rawBaseURL}/data/${experimentType}/${folderName}/${video.name}`;
+                            mainVideo.load();
+                        }
                     }
                 });
             } else {
@@ -321,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h2>Distribución de Resultados</h2>
                     </div>
                     <div class="card-body text-center">
-                        <iframe src="data/${experimentType}/${folderName}/pie_chart.html" width="100%" height="600" frameborder="0"></iframe>
+                        <iframe src="${rawBaseURL}/data/${experimentType}/${folderName}/pie_chart.html" width="100%" height="600" frameborder="0"></iframe>
                     </div>
                 </div>
             `;
@@ -334,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h2>Training Statistics</h2>
                     </div>
                     <div class="card-body text-center">
-                        <iframe src="data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
+                        <iframe src="${rawBaseURL}/data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
                     </div>
                 </div>
             `;
@@ -346,8 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
         }
     }
-
-
 
     async function fetchGitHubFile(path) {
         const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
