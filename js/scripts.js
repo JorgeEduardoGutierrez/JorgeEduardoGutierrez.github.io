@@ -2,11 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const githubUsername = 'JorgeEduardoGutierrez';
     const repositoryName = 'JorgeEduardoGutierrez.github.io';
     
-    // TODO: Proporciona tu token de GitHub de forma segura
-    // Es recomendable no incluir el token directamente en el código fuente
-    // Puedes obtener el token de un archivo de configuración seguro o variable de entorno
-    const githubToken = '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';
-
     function showLoading(show) {
         const loadingIndicator = document.getElementById('loadingIndicator');
         if (loadingIndicator) {
@@ -18,11 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
         console.log('URL solicitada:', url);
         try {
-            const response = await fetch(url, {
-                headers: {
-                    Authorization: `token ${githubToken}`,
-                },
-            });
+            const response = await fetch(url);
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Error de la API de GitHub:', errorData.message);
@@ -39,11 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}/contents/${path}`;
         console.log('URL solicitada para archivo:', url);
         try {
-            const response = await fetch(url, {
-                headers: {
-                    Authorization: `token ${githubToken}`,
-                },
-            });
+            const response = await fetch(url);
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Error de la API de GitHub:', errorData.message);
@@ -59,6 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error al cargar el archivo JSON:', error);
             throw error;
         }
+    }
+
+    // Resto del código permanece igual...
+
+    function setActiveLink(selectedLink) {
+        const links = document.querySelectorAll('#sidebarMenu .nav-link');
+        links.forEach(link => link.classList.remove('active'));
+        selectedLink.classList.add('active');
     }
 
     async function loadMainFolders() {
@@ -103,50 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error al cargar carpetas principales:', error);
             alert('Hubo un error al cargar las carpetas principales. Por favor, inténtalo de nuevo más tarde.');
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    function setActiveLink(selectedLink) {
-        const links = document.querySelectorAll('#sidebarMenu .nav-link');
-        links.forEach(link => link.classList.remove('active'));
-        selectedLink.classList.add('active');
-    }
-
-    async function loadExperimentSet(experimentType) {
-        try {
-            showLoading(true);
-            const experimentTabs = document.getElementById('experimentTabs');
-            const experimentTabsContent = document.getElementById('experimentTabsContent');
-            experimentTabs.innerHTML = '';
-            experimentTabsContent.innerHTML = '';
-
-            const data = await fetchFromGitHubAPI(`data/${experimentType}`);
-            const mainFolder = data.find(item => item.type === 'dir' && item.name === 'main');
-            const experimentFolders = data.filter(item => item.type === 'dir' && item.name !== 'main');
-
-            // Cargar contenido de 'main' si existe
-            if (mainFolder) {
-                createMainTab(experimentType);
-            }
-
-            // Cargar otros experimentos
-            experimentFolders.forEach((folder, index) => {
-                const expId = index + 1;
-                createExperimentTab(folder.name, expId);
-                createExperimentContent(folder.name, experimentType, expId);
-            });
-
-            // Activar la pestaña Main si existe, o la primera de los experimentos
-            const activeTab = document.querySelector(`#main-tab`) || document.querySelector(`#exp1-tab`);
-            if (activeTab) {
-                const tab = new bootstrap.Tab(activeTab);
-                tab.show();
-            }
-        } catch (error) {
-            console.error('Error al cargar los experimentos:', error);
-            alert('Hubo un error al cargar los experimentos. Por favor, inténtalo de nuevo más tarde.');
         } finally {
             showLoading(false);
         }
