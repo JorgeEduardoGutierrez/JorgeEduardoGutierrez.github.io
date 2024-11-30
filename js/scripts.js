@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2>Training Results</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="https://${githubUsername}.github.io/data/${experimentType}/main/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
+                            <iframe src="https://${githubUsername}.github.io/data/${experimentType}/main/training_results.html" width="100%" height="600" frameborder="0"></iframe>
                         </div>
                     </div>
                 `;
