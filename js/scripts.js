@@ -76,27 +76,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const experimentTabsContent = document.getElementById('experimentTabsContent');
             experimentTabs.innerHTML = '';
             experimentTabsContent.innerHTML = '';
-
+    
             const data = await fetchFromGitHubAPI(`data/${experimentType}`);
             const mainFolder = data.find(item => item.type === 'dir' && item.name === 'main');
             const experimentFolders = data.filter(item => item.type === 'dir' && item.name !== 'main');
-
+    
             // Cargar contenido de 'main' si existe
             if (mainFolder) {
                 createMainTab(experimentType);
             }
-
+    
             // Cargar otros experimentos
             experimentFolders.forEach((folder, index) => {
                 const expId = index + 1;
-                const isActive = index === 0 && !mainFolder; // Activo solo si no hay 'main'
+                const isActive = false; // No activar aquí, lo haremos después
                 createExperimentTab(folder.name, expId, isActive);
                 createExperimentContent(folder.name, experimentType, expId, isActive);
             });
-
-            // Activar la primera pestaña
-            const firstTabButton = document.querySelector(`#exp1-tab`);
-            if (firstTabButton) {
+    
+            // Activar la pestaña Main si existe, o la primera de los experimentos
+            if (document.querySelector(`#main-tab`)) {
+                const mainTab = document.querySelector(`#main-tab`);
+                const tab = new bootstrap.Tab(mainTab);
+                tab.show();
+            } else if (document.querySelector(`#exp1-tab`)) {
+                const firstTabButton = document.querySelector(`#exp1-tab`);
                 const tab = new bootstrap.Tab(firstTabButton);
                 tab.show();
             }
@@ -107,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading(false);
         }
     }
+
 
     function createMainTab(experimentType) {
         const experimentTabs = document.getElementById('experimentTabs');
@@ -266,20 +271,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
     
-            // Mostrar la segunda imagen (gráfica de resultados)
-            const testResultsHTML = `
+            // Mostrar el gráfico interactivo (Pie Chart)
+            const pieChartHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-success text-white">
-                        <h2>Gráfica de Resultados</h2>
+                        <h2>Distribución de Resultados</h2>
                     </div>
                     <div class="card-body text-center">
-                        <img src="data/${experimentType}/${folderName}/pie_chart.png" alt="Gráfica de Resultados" class="img-fluid">
+                        <iframe src="data/${experimentType}/${folderName}/pie_chart.html" width="100%" height="600" frameborder="0"></iframe>
                     </div>
                 </div>
             `;
-            tabContent.innerHTML += testResultsHTML;
+            tabContent.innerHTML += pieChartHTML;
     
-            // Cargar el gráfico interactivo desde plotly_tensorboard.html
+            // Cargar el gráfico interactivo de entrenamiento
             const plotlyHTML = `
                 <div class="card my-4">
                     <div class="card-header bg-primary text-white">
@@ -298,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Hubo un error al cargar el contenido del experimento. Por favor, inténtalo de nuevo más tarde.');
         }
     }
+
 
 
 
