@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2>Training Statistics</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/plotly_tensorboard.html" width="100%" height="600" frameborder="0"></iframe>
+                            <iframe src="data/${experimentType}/main/training_results.html" width="100%" height="600" frameborder="0"></iframe>
                         </div>
                     </div>
                 `;
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h2>Test Results</h2>
                         </div>
                         <div class="card-body text-center">
-                            <iframe src="data/${experimentType}/main/plotly_results.html" width="100%" height="600" frameborder="0"></iframe>
+                            <iframe src="data/${experimentType}/main/test_results.html" width="100%" height="600" frameborder="0"></iframe>
                         </div>
                     </div>
                 `;
@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h2>Training Statistics</h2>
                     </div>
                     <div class="card-body text-center">
-                        <iframe src="data/${experimentType}/${folderName}/plotly_tensorboard.html" width="100%" height="600" frameborder="0"></iframe>
+                        <iframe src="data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
                     </div>
                 </div>
             `;
