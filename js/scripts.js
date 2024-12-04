@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h2>Training Statistics</h2>
                     </div>
                     <div class="card-body text-center">
-                        <iframe src="${baseURL}/data/${experimentType}/${folderName}/training_statics.html" width="100%" height="600" frameborder="0"></iframe>
+                        <iframe src="${baseURL}/data/${experimentType}/${folderName}/training_statistics.html" width="100%" height="600" frameborder="0"></iframe>
                     </div>
                 </div>
             `;
