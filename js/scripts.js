@@ -310,6 +310,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 videoList.innerHTML = '<p>No hay videos disponibles para este experimento.</p>';
             }
 
+            const pieChartHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-success text-white">
+                        <h2>Pie Chart</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <iframe src="${baseURL}/data/${experimentType}/${folderName}/pie_chart.html" width="100%" height="600" frameborder="0"></iframe>
+                    </div>
+                </div>
+            `;
+            const pieChartSection = document.createElement('div');
+            pieChartSection.innerHTML = pieChartHTML;
+            tabContent.appendChild(pieChartSection);
+
             // **Sección de Training Statistics**
             const trainingHTML = `
                 <div class="card my-4">
