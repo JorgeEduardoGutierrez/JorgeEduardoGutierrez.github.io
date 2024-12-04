@@ -144,72 +144,91 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function createMainTab(experimentType) {
-        const experimentTabs = document.getElementById('experimentTabs');
-        const experimentTabsContent = document.getElementById('experimentTabsContent');
-
-        // Crear la pestaña "Main"
-        const tabItem = document.createElement('li');
-        tabItem.className = 'nav-item';
-        tabItem.innerHTML = `
-            <button class="nav-link" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="false">
-                Main
-            </button>
-        `;
-        experimentTabs.appendChild(tabItem);
-
-        // Crear el contenido de la pestaña "Main"
-        const tabContent = document.createElement('div');
-        tabContent.className = 'tab-pane fade';
-        tabContent.id = 'main';
-        tabContent.setAttribute('role', 'tabpanel');
-        tabContent.setAttribute('aria-labelledby', 'main-tab');
-
-        // Cargar y procesar el archivo config.json
-        fetchGitHubFile(`data/${experimentType}/main/config.json`)
-            .then(config => {
+    async function createMainTab(experimentType) {
+        try {
+            const experimentTabs = document.getElementById('experimentTabs');
+            const experimentTabsContent = document.getElementById('experimentTabsContent');
+    
+            if (!experimentTabs || !experimentTabsContent) {
+                console.error('Los elementos experimentTabs o experimentTabsContent no existen en el DOM.');
+                return;
+            }
+    
+            // Crear la pestaña "Main"
+            const tabItem = document.createElement('li');
+            tabItem.className = 'nav-item';
+            tabItem.innerHTML = `
+                <button class="nav-link" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="false">
+                    Main
+                </button>
+            `;
+            experimentTabs.appendChild(tabItem);
+    
+            // Crear el contenido de la pestaña "Main"
+            const tabContent = document.createElement('div');
+            tabContent.className = 'tab-pane fade';
+            tabContent.id = 'main';
+            tabContent.setAttribute('role', 'tabpanel');
+            tabContent.setAttribute('aria-labelledby', 'main-tab');
+    
+            // Cargar y procesar el archivo config.json
+            const configPath = `data/${experimentType}/main/config.json`;
+            try {
+                const config = await fetchGitHubFile(configPath);
                 console.log('config.json cargado para Main:', config);
-                // Crear el HTML a partir del JSON
+    
+                // Generar HTML a partir del JSON
                 const configHTML = generateConfigHTML(config);
-                tabContent.innerHTML = configHTML;
-
-                // Agregar el gráfico de Training Results
-                const trainingResultsHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-primary text-white">
-                            <h2>Training Results</h2>
-                        </div>
-                        <div class="card-body text-center">
-                            <iframe src="https://${githubUsername}.github.io/data/${experimentType}/main/training_results.html" width="100%" height="600" frameborder="0"></iframe>
-                        </div>
+                const configSection = document.createElement('div');
+                configSection.innerHTML = configHTML;
+                tabContent.appendChild(configSection);
+            } catch (error) {
+                console.error('Error al cargar config.json para Main:', error);
+                const errorHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        Error al cargar la configuración principal.
+                    </div>`;
+                const errorSection = document.createElement('div');
+                errorSection.innerHTML = errorHTML;
+                tabContent.appendChild(errorSection);
+            }
+    
+            // Agregar la sección de Training Results
+            const trainingResultsHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2>Training Results</h2>
                     </div>
-                `;
-                const trainingSection = document.createElement('div');
-                trainingSection.innerHTML = trainingHTML;
-                tabContent.appendChild(trainingSection);
-
-                // Agregar el gráfico de Test Results
-                const testResultsHTML = `
-                    <div class="card my-4">
-                        <div class="card-header bg-success text-white">
-                            <h2>Test Results</h2>
-                        </div>
-                        <div class="card-body text-center">
-                            <iframe src="https://${githubUsername}.github.io/data/${experimentType}/main/test_results.html" width="100%" height="600" frameborder="0"></iframe>
-                        </div>
+                    <div class="card-body text-center">
+                        <iframe src="https://${githubUsername}.github.io/data/${experimentType}/main/training_results.html" width="100%" height="600" frameborder="0"></iframe>
                     </div>
-                `;
-                const testResultsSection = document.createElement('div');
-                testResultsSection.innerHTML = testResultsHTML;
-                tabContent.appendChild(testResultsSection);
-            })
-            .catch(error => {
-                console.error('Error al cargar el contenido de la pestaña principal:', error);
-                tabContent.innerHTML = '<p>Error al cargar la configuración principal.</p>';
-            });
-
-        experimentTabsContent.appendChild(tabContent);
+                </div>
+            `;
+            const trainingSection = document.createElement('div');
+            trainingSection.innerHTML = trainingResultsHTML;
+            tabContent.appendChild(trainingSection);
+    
+            // Agregar la sección de Test Results
+            const testResultsHTML = `
+                <div class="card my-4">
+                    <div class="card-header bg-success text-white">
+                        <h2>Test Results</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <iframe src="https://${githubUsername}.github.io/data/${experimentType}/main/test_results.html" width="100%" height="600" frameborder="0"></iframe>
+                    </div>
+                </div>
+            `;
+            const testResultsSection = document.createElement('div');
+            testResultsSection.innerHTML = testResultsHTML;
+            tabContent.appendChild(testResultsSection);
+    
+            experimentTabsContent.appendChild(tabContent);
+        } catch (error) {
+            console.error('Error en createMainTab:', error);
+        }
     }
+
 
     function createExperimentTab(folderName, expId) {
         const experimentTabs = document.getElementById('experimentTabs');
